@@ -1,0 +1,240 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\forms\\reservationsearchform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\forms\\reservationsearchform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\forms\\reservationsearchform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\forms\\reservationsearchform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\data\\mockreservationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\data\\mockreservationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\services\\reservationsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\services\\reservationsearchservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\datastructures\\avltree.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\datastructures\\avltree.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\algorithms\\mergesorter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\algorithms\\mergesorter.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\algorithms\\reservationcomparers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\algorithms\\reservationcomparers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\models\\reservation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\models\\reservation.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\interface\\ireservationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\interface\\ireservationrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\models\\usertype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\models\\usertype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\models\\reservationstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\models\\reservationstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|c:\\users\\justinjacobjerald\\documents\\github\\mmcl_clir_rs\\mmcl_clirrs\\mmcl_clirrs\\mmcl_clirrs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{38A94B31-41AE-46FF-A5A5-6767D4D7ABB5}|MMCL_CLIRRS\\MMCL_CLIRRS.csproj|solutionrelative:mmcl_clirrs\\mmcl_clirrs.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ReservationSearchForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Forms\\ReservationSearchForm.Designer.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Forms\\ReservationSearchForm.Designer.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Forms\\ReservationSearchForm.Designer.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Forms\\ReservationSearchForm.Designer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:38:47.19Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Program.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Program.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Program.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAABLAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:35:12.588Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MockReservationRepository.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Data\\MockReservationRepository.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Data\\MockReservationRepository.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Data\\MockReservationRepository.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Data\\MockReservationRepository.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAUwDQAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:34:28.743Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ReservationSearchService.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Services\\ReservationSearchService.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Services\\ReservationSearchService.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Services\\ReservationSearchService.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Services\\ReservationSearchService.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAUwFAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:33:49.673Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "AvlTree.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\DataStructures\\AvlTree.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\DataStructures\\AvlTree.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\DataStructures\\AvlTree.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\DataStructures\\AvlTree.cs",
+              "ViewState": "AgIAAKQAAAAAAAAAAAAAALsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:33:09.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ReservationSearchForm.cs [Design]",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Forms\\ReservationSearchForm.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Forms\\ReservationSearchForm.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Forms\\ReservationSearchForm.cs [Design]",
+              "RelativeToolTip": "MMCL_CLIRRS\\Forms\\ReservationSearchForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T14:57:18.731Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MergeSorter.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Algorithms\\MergeSorter.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Algorithms\\MergeSorter.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Algorithms\\MergeSorter.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Algorithms\\MergeSorter.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:32:38.105Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ReservationComparers.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Algorithms\\ReservationComparers.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Algorithms\\ReservationComparers.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Algorithms\\ReservationComparers.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Algorithms\\ReservationComparers.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:31:55.327Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "IReservationRepository.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Interface\\IReservationRepository.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Interface\\IReservationRepository.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Interface\\IReservationRepository.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Interface\\IReservationRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:28:53.943Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "UserType.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\UserType.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Models\\UserType.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\UserType.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Models\\UserType.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:27:36.752Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ReservationStatus.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\ReservationStatus.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Models\\ReservationStatus.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\ReservationStatus.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Models\\ReservationStatus.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:25:48.028Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Reservation.cs",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\Reservation.cs",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\Models\\Reservation.cs",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\Models\\Reservation.cs",
+              "RelativeToolTip": "MMCL_CLIRRS\\Models\\Reservation.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAiwDIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-31T15:24:49.609Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MMCL_CLIRRS",
+              "DocumentMoniker": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+              "RelativeDocumentMoniker": "MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+              "ToolTip": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+              "RelativeToolTip": "MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-10-31T15:22:25.664Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
