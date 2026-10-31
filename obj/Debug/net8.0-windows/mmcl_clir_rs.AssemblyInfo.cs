@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("mmcl_clir_rs")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ddc96088d16bb1c3426d9adb7cf77bc2590509b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+81414fbd56f4fd05fa701503f538f0f433615098")]
 [assembly: System.Reflection.AssemblyProductAttribute("mmcl_clir_rs")]
 [assembly: System.Reflection.AssemblyTitleAttribute("mmcl_clir_rs")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

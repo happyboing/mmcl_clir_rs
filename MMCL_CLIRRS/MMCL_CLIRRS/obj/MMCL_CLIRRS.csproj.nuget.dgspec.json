@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj": {}
+    "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj": {
+    "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+        "projectUniqueName": "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
         "projectName": "MMCL_CLIRRS",
-        "projectPath": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
-        "packagesPath": "C:\\Users\\justinjacobjerald\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\justinjacobjerald\\Documents\\GitHub\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\obj\\",
+        "projectPath": "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\MMCL_CLIRRS.csproj",
+        "packagesPath": "C:\\Users\\aron migeel\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\MMCL_CLIRRS\\MMCL_CLIRRS\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\justinjacobjerald\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\aron migeel\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0-windows"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -41,7 +39,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.400"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0-windows": {
@@ -66,7 +64,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.402/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
