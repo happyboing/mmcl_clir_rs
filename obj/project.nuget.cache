@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "/4PcxrtkMz4=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\aron migeel\\Documents\\CODE - VS\\mmcl clirrs\\mmcl_clir_rs\\mmcl_clir_rs.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\aron migeel\\.nuget\\packages\\microsoft.netcore.app.ref\\8.0.29\\microsoft.netcore.app.ref.8.0.29.nupkg.sha512",
+    "C:\\Users\\aron migeel\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\8.0.29\\microsoft.windowsdesktop.app.ref.8.0.29.nupkg.sha512",
+    "C:\\Users\\aron migeel\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\8.0.29\\microsoft.aspnetcore.app.ref.8.0.29.nupkg.sha512",
+    "C:\\Users\\aron migeel\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\8.0.29\\microsoft.netcore.app.host.win-x64.8.0.29.nupkg.sha512"
+  ],
+  "logs": []
+}
