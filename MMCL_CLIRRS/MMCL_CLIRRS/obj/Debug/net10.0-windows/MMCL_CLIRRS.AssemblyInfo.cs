@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+65a00f70e7c26755df52e2592e6cbe509147d089")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a6853e07300a499d66085198c7f26c90c60b8e65")]
 [assembly: System.Reflection.AssemblyProductAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
