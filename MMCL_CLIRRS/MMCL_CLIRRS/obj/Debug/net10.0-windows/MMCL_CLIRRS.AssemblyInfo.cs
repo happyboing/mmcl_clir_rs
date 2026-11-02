@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ddc96088d16bb1c3426d9adb7cf77bc2590509b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2db1b30e66f404ac9070027d2e3169045f542c9d")]
 [assembly: System.Reflection.AssemblyProductAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MMCL_CLIRRS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

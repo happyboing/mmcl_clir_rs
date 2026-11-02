@@ -4,12 +4,18 @@ public class ReservationSearchService
 {
     private readonly IReservationRepository _repository;
 
-    private AvlTree<int> _byId = null!;
+    // Hash tables: exact-match lookups, O(1) on average.
+    private HashIndex<int> _byId = null!;
+    private HashIndex<string> _byUserId = null!;
+    private HashIndex<string> _bySpot = null!;
+    private HashIndex<ReservationStatus> _byStatus = null!;
+    private HashIndex<bool> _byRoomType = null!;
+
+    // AVL trees: ordered searches (prefix and range), O(log n).
     private AvlTree<string> _byName = null!;
-    private AvlTree<string> _byUserId = null!;
     private AvlTree<DateTime> _byDate = null!;
-    private AvlTree<string> _bySpot = null!;
-    private AvlTree<ReservationStatus> _byStatus = null!;
+
+    private List<IReservationIndex> _indexes = null!;
 
     public ReservationSearchService(IReservationRepository repository)
     {
@@ -20,12 +26,17 @@ public class ReservationSearchService
     // Rebuild every index from the master collection.
     public void Reload()
     {
-        _byId = new AvlTree<int>(r => r.ReservationId);
+        _byId = new HashIndex<int>(r => r.ReservationId);
+        _byUserId = new HashIndex<string>(r => r.UserIdNumber, StringComparer.OrdinalIgnoreCase);
+        _bySpot = new HashIndex<string>(r => r.SpotOrRoom, StringComparer.OrdinalIgnoreCase);
+        _byStatus = new HashIndex<ReservationStatus>(r => r.Status);
+        _byRoomType = new HashIndex<bool>(r => r.IsDiscussionRoom);
+
         _byName = new AvlTree<string>(r => r.UserName, StringComparer.OrdinalIgnoreCase);
-        _byUserId = new AvlTree<string>(r => r.UserIdNumber, StringComparer.OrdinalIgnoreCase);
         _byDate = new AvlTree<DateTime>(r => r.Date.Date);
-        _bySpot = new AvlTree<string>(r => r.SpotOrRoom, StringComparer.OrdinalIgnoreCase);
-        _byStatus = new AvlTree<ReservationStatus>(r => r.Status);
+
+        _indexes = new List<IReservationIndex>
+            { _byId, _byUserId, _bySpot, _byStatus, _byRoomType, _byName, _byDate };
 
         foreach (Reservation r in _repository.GetAll())
             Index(r);
@@ -34,26 +45,23 @@ public class ReservationSearchService
     // Functionality 1 should call this whenever a new reservation is created.
     public void Index(Reservation r)
     {
-        _byId.Insert(r);
-        _byName.Insert(r);
-        _byUserId.Insert(r);
-        _byDate.Insert(r);
-        _bySpot.Insert(r);
-        _byStatus.Insert(r);
+        foreach (IReservationIndex index in _indexes)
+            index.Insert(r);
     }
 
     // ---------- Searches ----------
     public Reservation? FindById(int id) => _byId.Find(id).FirstOrDefault();
-    public List<Reservation> SearchByName(string name) => _byName.Find(name).ToList();
     public List<Reservation> SearchByUserId(string userId) => _byUserId.Find(userId).ToList();
     public List<Reservation> SearchBySpot(string spot) => _bySpot.Find(spot).ToList();
     public List<Reservation> SearchByStatus(ReservationStatus status) => _byStatus.Find(status).ToList();
+    public List<Reservation> GetDiscussionRooms() => _byRoomType.Find(true).ToList();
+
+    // Prefix search: "mar" finds Maria Santos. Works as a range query on the sorted name tree.
+    public List<Reservation> SearchByName(string prefix)
+        => _byName.FindRange(prefix, prefix + '\uffff');
 
     public List<Reservation> SearchByDateRange(DateTime from, DateTime to)
         => _byDate.FindRange(from.Date, to.Date);
-
-    public List<Reservation> GetDiscussionRooms()
-        => _repository.GetAll().Where(r => r.IsDiscussionRoom).ToList();
 
     // Chronological list using your Merge Sort.
     public List<Reservation> GetAllChronological()
@@ -67,7 +75,7 @@ public class ReservationSearchService
     public bool MarkExpired(int reservationId)
         => ChangeStatus(reservationId, ReservationStatus.Active, r => r.MarkExpired());
 
-    // Remove from the status tree BEFORE the key changes, then re-insert.
+    // Remove from the status index BEFORE the key changes, then re-insert.
     private bool ChangeStatus(int id, ReservationStatus mustBe, Action<Reservation> change)
     {
         Reservation? r = FindById(id);
