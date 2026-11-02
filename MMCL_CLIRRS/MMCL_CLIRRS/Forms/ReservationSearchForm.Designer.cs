@@ -40,6 +40,9 @@
             pnlHeader = new Panel();
             lblTitle = new Label();
             cmbStatus = new ComboBox();
+            btnActivityLog = new Button();
+            btnVerify = new Button();
+            btnUpdate = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvReservations).BeginInit();
             pnlHeader.SuspendLayout();
             SuspendLayout();
@@ -119,16 +122,16 @@
             // 
             // btnCancelReservation
             // 
-            btnCancelReservation.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCancelReservation.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnCancelReservation.BackColor = Color.FromArgb(140, 20, 20);
             btnCancelReservation.Cursor = Cursors.Hand;
             btnCancelReservation.FlatAppearance.BorderSize = 0;
             btnCancelReservation.FlatStyle = FlatStyle.Flat;
             btnCancelReservation.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnCancelReservation.ForeColor = Color.White;
-            btnCancelReservation.Location = new Point(790, 76);
+            btnCancelReservation.Location = new Point(332, 558);
             btnCancelReservation.Name = "btnCancelReservation";
-            btnCancelReservation.Size = new Size(170, 32);
+            btnCancelReservation.Size = new Size(190, 36);
             btnCancelReservation.TabIndex = 7;
             btnCancelReservation.Text = "Cancel Reservation";
             btnCancelReservation.UseVisualStyleBackColor = false;
@@ -148,7 +151,7 @@
             dgvReservations.ReadOnly = true;
             dgvReservations.RowHeadersVisible = false;
             dgvReservations.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvReservations.Size = new Size(960, 455);
+            dgvReservations.Size = new Size(960, 405);
             dgvReservations.TabIndex = 8;
             // 
             // pnlHeader
@@ -182,11 +185,59 @@
             cmbStatus.Size = new Size(170, 25);
             cmbStatus.TabIndex = 10;
             // 
+            // btnActivityLog
+            // 
+            btnActivityLog.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnActivityLog.BackColor = Color.White;
+            btnActivityLog.Cursor = Cursors.Hand;
+            btnActivityLog.FlatStyle = FlatStyle.Flat;
+            btnActivityLog.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnActivityLog.ForeColor = Color.FromArgb(183, 28, 28);
+            btnActivityLog.Location = new Point(782, 75);
+            btnActivityLog.Name = "btnActivityLog";
+            btnActivityLog.Size = new Size(190, 32);
+            btnActivityLog.TabIndex = 11;
+            btnActivityLog.Text = "Activity Log";
+            btnActivityLog.UseVisualStyleBackColor = false;
+            // 
+            // btnVerify
+            // 
+            btnVerify.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnVerify.BackColor = Color.FromArgb(183, 28, 28);
+            btnVerify.Cursor = Cursors.Hand;
+            btnVerify.FlatStyle = FlatStyle.Flat;
+            btnVerify.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnVerify.ForeColor = Color.White;
+            btnVerify.Location = new Point(20, 558);
+            btnVerify.Name = "btnVerify";
+            btnVerify.Size = new Size(150, 36);
+            btnVerify.TabIndex = 12;
+            btnVerify.Text = "Verify";
+            btnVerify.UseVisualStyleBackColor = false;
+            // 
+            // btnUpdate
+            // 
+            btnUpdate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnUpdate.BackColor = Color.FromArgb(183, 28, 28);
+            btnUpdate.Cursor = Cursors.Hand;
+            btnUpdate.FlatStyle = FlatStyle.Flat;
+            btnUpdate.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnUpdate.ForeColor = Color.White;
+            btnUpdate.Location = new Point(176, 558);
+            btnUpdate.Name = "btnUpdate";
+            btnUpdate.Size = new Size(150, 36);
+            btnUpdate.TabIndex = 13;
+            btnUpdate.Text = "Update";
+            btnUpdate.UseVisualStyleBackColor = false;
+            // 
             // ReservationSearchForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(984, 636);
+            Controls.Add(btnUpdate);
+            Controls.Add(btnVerify);
+            Controls.Add(btnActivityLog);
             Controls.Add(cmbStatus);
             Controls.Add(lblSearchBy);
             Controls.Add(pnlHeader);
@@ -224,5 +275,8 @@
         private Panel pnlHeader;
         private Label lblTitle;
         private ComboBox cmbStatus;
+        private Button btnActivityLog;
+        private Button btnVerify;
+        private Button btnUpdate;
     }
 }

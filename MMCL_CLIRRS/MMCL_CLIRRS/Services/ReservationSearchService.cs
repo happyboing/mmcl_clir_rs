@@ -17,6 +17,9 @@ public class ReservationSearchService
 
     private List<IReservationIndex> _indexes = null!;
 
+    // Management operations, most recent on top.
+    private readonly LinkedStack<ActivityLogEntry> _activityLog = new LinkedStack<ActivityLogEntry>();
+
     public ReservationSearchService(IReservationRepository repository)
     {
         _repository = repository;
@@ -67,23 +70,121 @@ public class ReservationSearchService
     public List<Reservation> GetAllChronological()
         => MergeSorter.Sort(_repository.GetAll().ToList(), new ReservationDateTimeComparer());
 
-    // ---------- Management ----------
+    // ---------- Status changes (other functionalities call these too) ----------
     public bool Cancel(int reservationId)
-        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.Cancel());
+        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.Cancel(),
+                        OperationType.Cancel, "Reservation cancelled");
 
-    // For Functionality 2 to call when the grace period or end time passes.
+    // For Functionality 2: the 5-minute grace period passed with nobody there.
     public bool MarkExpired(int reservationId)
-        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.MarkExpired());
+        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.MarkExpired(),
+                        OperationType.Expire, "Not occupied within the grace period");
 
-    // Remove from the status index BEFORE the key changes, then re-insert.
-    private bool ChangeStatus(int id, ReservationStatus mustBe, Action<Reservation> change)
+    // For Functionality 2: an occupied reservation reached its end time.
+    public bool MarkCompleted(int reservationId)
+        => ChangeStatus(reservationId, ReservationStatus.Occupied, r => r.MarkCompleted(),
+                        OperationType.Complete, "Reservation time ended");
+
+    // ---------- Verify ----------
+    // Staff confirm that the person at the spot is the person who reserved it.
+    public OperationResult Verify(int reservationId, string enteredIdNumber)
+    {
+        Reservation? r = FindById(reservationId);
+        if (r == null) return new OperationResult(false, "Reservation not found.");
+        if (r.Status != ReservationStatus.Active)
+            return new OperationResult(false, "Only active reservations can be verified.");
+
+        if (!r.MatchesUser(enteredIdNumber))
+        {
+            Log(OperationType.VerifyFailed, r, "ID number did not match the reservation");
+            return new OperationResult(false,
+                "That ID number does not match the person who reserved this spot.");
+        }
+
+        ApplyChange(r, x => x.MarkOccupied());
+        Log(OperationType.Verify, r, "Occupant verified");
+        return new OperationResult(true, $"{r.UserName} is verified. The reservation is now Occupied.");
+    }
+
+    // ---------- Update ----------
+    public OperationResult Update(int reservationId, string spotOrRoom, bool isDiscussionRoom,
+                                  DateTime date, TimeSpan startTime, TimeSpan endTime)
+    {
+        Reservation? r = FindById(reservationId);
+        if (r == null) return new OperationResult(false, "Reservation not found.");
+        if (r.Status != ReservationStatus.Active)
+            return new OperationResult(false, "Only active reservations can be updated.");
+        if (string.IsNullOrWhiteSpace(spotOrRoom))
+            return new OperationResult(false, "Spot or room is required.");
+        if (endTime <= startTime)
+            return new OperationResult(false, "End time must be after the start time.");
+
+        Reservation? conflict = FindConflict(r, spotOrRoom.Trim(), date.Date, startTime, endTime);
+        if (conflict != null)
+            return new OperationResult(false,
+                $"That slot overlaps reservation #{conflict.ReservationId} ({conflict.UserName}, " +
+                $"{Clock(conflict.StartTime)}-{Clock(conflict.EndTime)}) for the same spot.");
+
+        string before = Describe(r);
+        ApplyChange(r, x => x.Reschedule(spotOrRoom, isDiscussionRoom, date, startTime, endTime));
+        Log(OperationType.Update, r, $"{before}  ->  {Describe(r)}");
+        return new OperationResult(true, "Reservation updated.");
+    }
+
+    // ---------- Activity log ----------
+    // Most recent first, straight from the top of the stack.
+    public List<ActivityLogEntry> GetRecentActivity(int count = 100)
+        => _activityLog.ToList().Take(count).ToList();
+
+    // ---------- Internals ----------
+    private bool ChangeStatus(int id, ReservationStatus mustBe, Action<Reservation> change,
+                              OperationType operation, string details)
     {
         Reservation? r = FindById(id);
         if (r == null || r.Status != mustBe) return false;
 
-        _byStatus.Remove(r);
-        change(r);
-        _byStatus.Insert(r);
+        ApplyChange(r, change);
+        Log(operation, r, details);
         return true;
     }
+
+    // Take the reservation out of every index, change it, put it back.
+    // The finally block guarantees the indexes are restored even if the change throws.
+    private void ApplyChange(Reservation r, Action<Reservation> change)
+    {
+        foreach (IReservationIndex index in _indexes)
+            index.Remove(r);
+
+        try { change(r); }
+        finally
+        {
+            foreach (IReservationIndex index in _indexes)
+                index.Insert(r);
+        }
+    }
+
+    // Uses the spot hash index, so only reservations for that spot are examined.
+    private Reservation? FindConflict(Reservation self, string spot, DateTime date,
+                                      TimeSpan start, TimeSpan end)
+    {
+        foreach (Reservation other in _bySpot.Find(spot))
+        {
+            if (ReferenceEquals(other, self)) continue;
+            if (other.Status != ReservationStatus.Active &&
+                other.Status != ReservationStatus.Occupied) continue;
+            if (other.Date.Date != date) continue;
+
+            if (start < other.EndTime && other.StartTime < end)   // time ranges overlap
+                return other;
+        }
+        return null;
+    }
+
+    private void Log(OperationType operation, Reservation r, string details)
+        => _activityLog.Push(new ActivityLogEntry(DateTime.Now, operation, r.ReservationId, r.UserName, details));
+
+    private static string Clock(TimeSpan t) => t.ToString(@"hh\:mm");
+
+    private static string Describe(Reservation r)
+        => $"{r.SpotOrRoom}, {r.Date:dd MMM}, {Clock(r.StartTime)}-{Clock(r.EndTime)}";
 }
