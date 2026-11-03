@@ -441,7 +441,7 @@ public class SeatMapForm : Form
             g.DrawPath(furniturePen, cellPath);
 
             g.DrawString("table", tinyFont, Brushes.DimGray,
-                new RectangleF(cell.X, cell.Bottom - 16, cell.Width, 14), centerFormat);
+                new RectangleF(cell.X, cell.Bottom + 2, cell.Width, 14), centerFormat);
         }
 
         // Round tables with their names.
@@ -483,15 +483,15 @@ public class SeatMapForm : Form
         using var labelFont = new Font("Segoe UI", 7.5f, FontStyle.Bold);
         using var labelBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
 
-        var table = new Rectangle(45, 70, 180, 40);
+        var table = new Rectangle(20, 70, 180, 40);
         using GraphicsPath tablePath = RoundedRect(table, 6);
         g.FillPath(fill, tablePath);
         g.DrawPath(line, tablePath);
 
         for (int i = 0; i < 5; i++)
-            g.FillRectangle(monitorBrush, 55 + i * 32, 84, 20, 12);
+            g.FillRectangle(monitorBrush, 30 + i * 32, 84, 20, 12);
 
-        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(55, 48));
+        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(30, 48));
     }
 
     private static void DrawFurniture(Graphics g, Rectangle bounds, string text, float fontSize = 8.5f)
