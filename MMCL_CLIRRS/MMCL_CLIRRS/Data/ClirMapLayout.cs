@@ -29,7 +29,7 @@ public static class ClirMapLayout
         new Point(100, 430),   // Table 2 - lower-left floor area
         new Point(335, 370),   // Table 3 - large centre table
         new Point(650, 330),   // Table 4 - large right-side table
-        new Point(680, 155)    // Table 5 - top-right table
+        new Point(680, 130)    // Table 5 - top-right table
     };
 
     public static IReadOnlyList<ClirMapSpot> Spots { get; } = BuildSpots();
@@ -123,13 +123,13 @@ public static class ClirMapLayout
                 "—",
                 "Window Area",
                 i + 1,
-                new Rectangle(210 + i * 62, 8, 56, 58)));
+                new Rectangle(260 + i * 62, 8, 56, 58)));
         }
 
         // Another five bean bags above the row of small tables.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
-            int cellX = 210 + i * 62;
+            int cellX = 260 + i * 62;
             spots.Add(new ClirMapSpot(
                 $"Bean Bag {i + 6}",
                 ClirSpotKind.BeanBag,
@@ -142,7 +142,7 @@ public static class ClirMapLayout
         // Five small tables, each with one solo seat below it.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
-            int cellX = 210 + i * 62;
+            int cellX = 260 + i * 62;
             spots.Add(new ClirMapSpot(
                 $"Bean Bag Table Seat {i + 1}",
                 ClirSpotKind.Seat,

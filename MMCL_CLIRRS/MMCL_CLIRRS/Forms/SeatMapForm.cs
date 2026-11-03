@@ -433,7 +433,7 @@ public class SeatMapForm : Form
         // Five small tables, each with one seat underneath.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
-            var cell = new Rectangle(210 + i * 62, 145, 58, 58);
+            var cell = new Rectangle(260 + i * 62, 145, 58, 58);
             using GraphicsPath cellPath = RoundedRect(cell, 5);
             g.FillPath(furnitureBrush, cellPath);
             g.DrawPath(furniturePen, cellPath);
@@ -465,9 +465,9 @@ public class SeatMapForm : Form
             g.DrawPath(roomPen, wingPath);
         }
 
-        // Entrance and exit sit flush with the open bottom edge.
-        DrawFurniture(g, new Rectangle(24, 524, 110, 28), "Exit", 8.5f);
-        DrawFurniture(g, new Rectangle(724, 524, 150, 28), "Entrance", 8.5f);
+        // Smaller door-style entrance and exit, flush with the bottom edge.
+        DrawDoor(g, new Rectangle(24, 528, 76, 24), "Exit");
+        DrawDoor(g, new Rectangle(790, 528, 88, 24), "Entrance");
     }
 
     private static void DrawMonitorTable(Graphics g)
@@ -489,23 +489,30 @@ public class SeatMapForm : Form
         g.DrawString("Table with Monitors", labelFont, labelBrush, new PointF(30, 48));
     }
 
-    private static void DrawFurniture(Graphics g, Rectangle bounds, string text, float fontSize = 8.5f)
+    private static void DrawDoor(Graphics g, Rectangle bounds, string text)
     {
-        using GraphicsPath path = RoundedRect(bounds, 7);
-        using var fill = new SolidBrush(Color.FromArgb(224, 224, 224));
-        using var line = new Pen(Color.FromArgb(90, 90, 90), 1.7f);
-        using var font = new Font("Segoe UI", fontSize, FontStyle.Bold);
+        using GraphicsPath path = RoundedRect(bounds, 2);
+        using var fill = new SolidBrush(Color.FromArgb(238, 238, 238));
+        using var line = new Pen(Color.FromArgb(70, 70, 70), 1.7f);
+        using var detail = new Pen(Color.FromArgb(120, 120, 120), 1.1f);
+        using var knob = new SolidBrush(Color.FromArgb(90, 90, 90));
 
         g.FillPath(fill, path);
         g.DrawPath(line, path);
 
+        // A diagonal leaf and a handle make the block read as a door.
+        g.DrawLine(detail, bounds.Left + 7, bounds.Top + 4,
+                           bounds.Left + 21, bounds.Bottom - 4);
+        g.FillEllipse(knob, bounds.Right - 12, bounds.Top + bounds.Height / 2 - 2, 4, 4);
+
+        using var font = new Font("Segoe UI", 7.5f, FontStyle.Bold);
         using var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
         g.DrawString(text, font, Brushes.DimGray,
-            new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height), format);
+            new RectangleF(bounds.X + 22, bounds.Y, bounds.Width - 24, bounds.Height), format);
     }
 
     // =========================================================
