@@ -1,6 +1,6 @@
 ﻿namespace MMCL_CLIRRS;
 
-public class AvlTree<TKey>
+public class AvlTree<TKey> : IReservationIndex<TKey>
 {
     // Private nested node: outside code never touches the tree's internals.
     private class Node

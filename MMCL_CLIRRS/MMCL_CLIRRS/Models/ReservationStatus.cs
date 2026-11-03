@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace MMCL_CLIRRS;
 
-namespace MMCL_CLIRRS
+public enum ReservationStatus
 {
-    public enum ReservationStatus
-    {
-        Active,
-        Completed,
-        Cancelled,
-        Expired
-    }
+    Active,
+    Completed,
+    Cancelled,
+    Expired,
+    Occupied
 }
