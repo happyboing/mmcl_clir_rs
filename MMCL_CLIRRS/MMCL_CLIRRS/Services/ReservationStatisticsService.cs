@@ -12,14 +12,12 @@ public class ReservationStatisticsService
         _search = search;
     }
 
-    public ReservationStatistics Build()
+    public ReservationStatistics Build(TrendGrouping trendGrouping = TrendGrouping.Day)
     {
-        List<Reservation> all = _search.GetAllChronological();
-
-        var areaBySpot = ClirMapLayout.Spots
-            .GroupBy(spot => spot.SpotOrRoom, StringComparer.OrdinalIgnoreCase)
-            .ToDictionary(group => group.Key, group => group.First().Area,
-                          StringComparer.OrdinalIgnoreCase);
+        // Expired records are no longer shown in the reports.
+        List<Reservation> all = _search.GetAllChronological()
+            .Where(r => r.Status != ReservationStatus.Expired)
+            .ToList();
 
         ReservationGraph graph = BuildGraph(all);
 
@@ -30,21 +28,20 @@ public class ReservationStatisticsService
             Occupied = CountStatus(all, ReservationStatus.Occupied),
             Completed = CountStatus(all, ReservationStatus.Completed),
             Cancelled = CountStatus(all, ReservationStatus.Cancelled),
-            Expired = CountStatus(all, ReservationStatus.Expired),
-            DiscussionRoomReservations = all.Count(r => r.IsDiscussionRoom),
 
             GraphNodes = graph.NodeCount,
             GraphConnections = graph.ConnectionCount,
 
-            StatusCounts = Enum.GetValues<ReservationStatus>()
-                .Select(status => new CountItem(status.ToString(), CountStatus(all, status)))
-                .ToList(),
+            StatusCounts = new List<CountItem>
+            {
+                new("Active", CountStatus(all, ReservationStatus.Active)),
+                new("Occupied", CountStatus(all, ReservationStatus.Occupied)),
+                new("Completed", CountStatus(all, ReservationStatus.Completed)),
+                new("Cancelled", CountStatus(all, ReservationStatus.Cancelled))
+            },
 
-            AreaCounts = GroupCounts(all, r => AreaOf(r, areaBySpot)),
             SpotCounts = GroupCounts(all, r => r.SpotOrRoom).Take(12).ToList(),
-            DiscussionRoomCounts = GroupCounts(
-                all.Where(r => r.IsDiscussionRoom), r => r.SpotOrRoom),
-            TrendCounts = BuildTrends(all),
+            TrendCounts = BuildTrends(all, trendGrouping),
 
             DepartmentCounts = GroupCounts(all, r => NonEmpty(r.Department, "Unspecified")),
             ProgramCounts = GroupCounts(all, r => NonEmpty(r.Program, "Unspecified")),
@@ -81,7 +78,7 @@ public class ReservationStatisticsService
         return graph;
     }
 
-    private static List<CountItem> BuildTrends(List<Reservation> all)
+    private static List<CountItem> BuildTrends(List<Reservation> all, TrendGrouping grouping)
     {
         if (all.Count == 0) return new List<CountItem>();
 
@@ -96,23 +93,32 @@ public class ReservationStatisticsService
         List<Reservation> ordered = dateTree.FindRange(first, last);
 
         return ordered
-            .GroupBy(r => r.Date.Date)
-            .Select(group => new CountItem(group.Key.ToString("dd MMM"), group.Count()))
+            .GroupBy(r => PeriodKey(r.Date.Date, grouping))
+            .Select(group => new CountItem(PeriodLabel(group.Key, grouping), group.Count()))
             .ToList();
     }
+
+    private static DateTime PeriodKey(DateTime date, TrendGrouping grouping)
+        => grouping switch
+        {
+            TrendGrouping.Week => date.AddDays(-(((int)date.DayOfWeek + 6) % 7)),
+            TrendGrouping.Month => new DateTime(date.Year, date.Month, 1),
+            TrendGrouping.Year => new DateTime(date.Year, 1, 1),
+            _ => date.Date
+        };
+
+    private static string PeriodLabel(DateTime date, TrendGrouping grouping)
+        => grouping switch
+        {
+            TrendGrouping.Week => $"Week of {date:dd MMM}",
+            TrendGrouping.Month => date.ToString("MMM yyyy"),
+            TrendGrouping.Year => date.ToString("yyyy"),
+            _ => date.ToString("dd MMM")
+        };
 
     private static int CountStatus(IEnumerable<Reservation> reservations,
                                    ReservationStatus status)
         => reservations.Count(r => r.Status == status);
-
-    private static string AreaOf(Reservation reservation,
-                                 IReadOnlyDictionary<string, string> areaBySpot)
-    {
-        if (areaBySpot.TryGetValue(reservation.SpotOrRoom, out string? area))
-            return area;
-
-        return reservation.IsDiscussionRoom ? "Discussion Room Wing" : "Other / Unmapped";
-    }
 
     private static List<CountItem> GroupCounts(
         IEnumerable<Reservation> reservations,

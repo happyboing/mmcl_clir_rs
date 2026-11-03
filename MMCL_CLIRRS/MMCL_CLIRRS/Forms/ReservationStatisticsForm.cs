@@ -9,8 +9,11 @@ public class ReservationStatisticsForm : Form
     private readonly ReservationSearchService _search;
     private readonly Panel _contentPanel = new Panel();
     private readonly Label _lblSummary = new Label();
+    private readonly ComboBox _cmbTrend = new ComboBox();
 
     private ReservationStatistics _stats = new();
+    private TrendGrouping _trendGrouping = TrendGrouping.Day;
+    private TabControl? _tabs;
 
     public ReservationStatisticsForm(ReservationSearchService search)
     {
@@ -92,6 +95,26 @@ public class ReservationStatisticsForm : Form
         _lblSummary.Font = new Font("Segoe UI", 9.5f, FontStyle.Bold);
         toolbar.Controls.Add(_lblSummary);
 
+        toolbar.Controls.Add(new Label
+        {
+            Text = "Trend grouping:",
+            Location = new Point(820, 13),
+            AutoSize = true,
+            ForeColor = Color.FromArgb(55, 71, 79)
+        });
+
+        _cmbTrend.DropDownStyle = ComboBoxStyle.DropDownList;
+        _cmbTrend.Items.AddRange(new object[] { "Day", "Week", "Month", "Year" });
+        _cmbTrend.SelectedIndex = 0;
+        _cmbTrend.Location = new Point(930, 8);
+        _cmbTrend.Width = 110;
+        _cmbTrend.SelectedIndexChanged += (s, e) =>
+        {
+            _trendGrouping = (TrendGrouping)_cmbTrend.SelectedIndex;
+            ReloadStatistics();
+        };
+        toolbar.Controls.Add(_cmbTrend);
+
         Controls.Add(toolbar);
 
         Controls.Add(new Panel
@@ -123,30 +146,35 @@ public class ReservationStatisticsForm : Form
 
     private void ReloadStatistics()
     {
-        _stats = new ReservationStatisticsService(_search).Build();
+        _stats = new ReservationStatisticsService(_search).Build(_trendGrouping);
 
         _lblSummary.Text =
-            $"Total reservations: {_stats.Total}   •   Active: {_stats.Active}   •   " +
-            $"Occupied: {_stats.Occupied}   •   Graph: {_stats.GraphNodes} nodes / " +
-            $"{_stats.GraphConnections} links";
+            $"Total reservations (excluding expired): {_stats.Total}   •   " +
+            $"Active: {_stats.Active}   •   Occupied: {_stats.Occupied}   •   " +
+            $"Graph: {_stats.GraphNodes} nodes / {_stats.GraphConnections} links";
+
+        int selectedTab = _tabs?.SelectedIndex ?? 0;
 
         _contentPanel.SuspendLayout();
         foreach (Control control in _contentPanel.Controls)
             control.Dispose();
         _contentPanel.Controls.Clear();
 
-        var tabs = new TabControl
+        _tabs = new TabControl
         {
             Dock = DockStyle.Fill,
             Font = new Font("Segoe UI", 9.5f)
         };
 
-        tabs.TabPages.Add(BuildOverviewTab());
-        tabs.TabPages.Add(BuildLocationsTab());
-        tabs.TabPages.Add(BuildUsersTab());
-        tabs.TabPages.Add(BuildActivityTab());
+        _tabs.TabPages.Add(BuildOverviewTab());
+        _tabs.TabPages.Add(BuildLocationsTab());
+        _tabs.TabPages.Add(BuildUsersTab());
+        _tabs.TabPages.Add(BuildActivityTab());
 
-        _contentPanel.Controls.Add(tabs);
+        if (selectedTab < _tabs.TabCount)
+            _tabs.SelectedIndex = selectedTab;
+
+        _contentPanel.Controls.Add(_tabs);
         _contentPanel.ResumeLayout();
     }
 
@@ -185,9 +213,6 @@ public class ReservationStatisticsForm : Form
         cards.Controls.Add(MakeStatCard("Occupied", _stats.Occupied, Color.FromArgb(198, 40, 40)));
         cards.Controls.Add(MakeStatCard("Completed", _stats.Completed, Color.FromArgb(21, 101, 192)));
         cards.Controls.Add(MakeStatCard("Cancelled", _stats.Cancelled, Color.FromArgb(239, 108, 0)));
-        cards.Controls.Add(MakeStatCard("Expired", _stats.Expired, Color.Gray));
-        cards.Controls.Add(MakeStatCard("Discussion Rooms", _stats.DiscussionRoomReservations,
-            Color.FromArgb(0, 121, 107)));
 
         layout.Controls.Add(cards, 0, 0);
         layout.SetColumnSpan(cards, 2);
@@ -197,7 +222,7 @@ public class ReservationStatisticsForm : Form
         layout.Controls.Add(statusChart, 0, 1);
 
         var trendChart = new StatBarChart { Dock = DockStyle.Fill, Margin = new Padding(4) };
-        trendChart.SetData("Reservation Trends by Date", _stats.TrendCounts);
+        trendChart.SetData($"Reservation Trends ({_trendGrouping})", _stats.TrendCounts);
         layout.Controls.Add(trendChart, 1, 1);
 
         page.Controls.Add(layout);
@@ -243,29 +268,10 @@ public class ReservationStatisticsForm : Form
     {
         var page = NewPage("Locations");
 
-        var layout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 3,
-            RowCount = 1,
-            BackColor = Color.White
-        };
-        for (int i = 0; i < 3; i++)
-            layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / 3f));
+        page.Controls.Add(MakeCountGroup(
+            $"Most Used Areas/Seats ({_stats.SpotCounts.Count})",
+            "Area / Seat", _stats.SpotCounts));
 
-        layout.Controls.Add(MakeCountGroup(
-            $"Frequently Reserved Areas ({_stats.AreaCounts.Count})",
-            "Area", _stats.AreaCounts), 0, 0);
-
-        layout.Controls.Add(MakeCountGroup(
-            $"Most-Used Seats ({_stats.SpotCounts.Count})",
-            "Seat / Spot", _stats.SpotCounts), 1, 0);
-
-        layout.Controls.Add(MakeCountGroup(
-            $"Discussion Room Usage ({_stats.DiscussionRoomReservations})",
-            "Room", _stats.DiscussionRoomCounts), 2, 0);
-
-        page.Controls.Add(layout);
         return page;
     }
 

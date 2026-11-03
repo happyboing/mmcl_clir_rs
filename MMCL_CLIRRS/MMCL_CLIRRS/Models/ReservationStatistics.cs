@@ -2,6 +2,14 @@ namespace MMCL_CLIRRS;
 
 public sealed record CountItem(string Label, int Count);
 
+public enum TrendGrouping
+{
+    Day,
+    Week,
+    Month,
+    Year
+}
+
 // Everything the statistics/report screen needs, calculated once per refresh.
 public class ReservationStatistics
 {
@@ -10,16 +18,12 @@ public class ReservationStatistics
     public int Occupied { get; init; }
     public int Completed { get; init; }
     public int Cancelled { get; init; }
-    public int Expired { get; init; }
-    public int DiscussionRoomReservations { get; init; }
 
     public int GraphNodes { get; init; }
     public int GraphConnections { get; init; }
 
     public List<CountItem> StatusCounts { get; init; } = new();
-    public List<CountItem> AreaCounts { get; init; } = new();
     public List<CountItem> SpotCounts { get; init; } = new();
-    public List<CountItem> DiscussionRoomCounts { get; init; } = new();
     public List<CountItem> TrendCounts { get; init; } = new();
 
     public List<CountItem> DepartmentCounts { get; init; } = new();
