@@ -17,8 +17,10 @@ public class ReservationSearchService
 
     private List<IReservationIndex> _indexes = null!;
 
-    // Management operations, most recent on top.
+    // Two stacks, most recent on top:
+    // the permanent history, and the staff actions that can still be undone.
     private readonly LinkedStack<ActivityLogEntry> _activityLog = new LinkedStack<ActivityLogEntry>();
+    private readonly LinkedStack<UndoableOperation> _undoStack = new LinkedStack<UndoableOperation>();
 
     public ReservationSearchService(IReservationRepository repository)
     {
@@ -71,19 +73,30 @@ public class ReservationSearchService
         => MergeSorter.Sort(_repository.GetAll().ToList(), new ReservationDateTimeComparer());
 
     // ---------- Status changes (other functionalities call these too) ----------
-    public bool Cancel(int reservationId)
-        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.Cancel(),
-                        OperationType.Cancel, "Reservation cancelled");
+
+    // undoable = true only when staff cancel from the management screen.
+    // Other functionalities leave it false, so their cancellations never land on staff's undo stack.
+    public bool Cancel(int reservationId, bool undoable = false)
+    {
+        Reservation? r = ChangeStatus(reservationId, ReservationStatus.Active, x => x.Cancel(),
+                                      OperationType.Cancel, "Reservation cancelled");
+        if (r == null) return false;
+
+        if (undoable)
+            _undoStack.Push(new ReactivateOperation(r,
+                $"Cancelled reservation #{r.ReservationId} ({r.UserName})"));
+        return true;
+    }
 
     // For Functionality 2: the 5-minute grace period passed with nobody there.
     public bool MarkExpired(int reservationId)
-        => ChangeStatus(reservationId, ReservationStatus.Active, r => r.MarkExpired(),
-                        OperationType.Expire, "Not occupied within the grace period");
+        => ChangeStatus(reservationId, ReservationStatus.Active, x => x.MarkExpired(),
+                        OperationType.Expire, "Not occupied within the grace period") != null;
 
     // For Functionality 2: an occupied reservation reached its end time.
     public bool MarkCompleted(int reservationId)
-        => ChangeStatus(reservationId, ReservationStatus.Occupied, r => r.MarkCompleted(),
-                        OperationType.Complete, "Reservation time ended");
+        => ChangeStatus(reservationId, ReservationStatus.Occupied, x => x.MarkCompleted(),
+                        OperationType.Complete, "Reservation time ended") != null;
 
     // ---------- Verify ----------
     // Staff confirm that the person at the spot is the person who reserved it.
@@ -103,6 +116,7 @@ public class ReservationSearchService
 
         ApplyChange(r, x => x.MarkOccupied());
         Log(OperationType.Verify, r, "Occupant verified");
+        _undoStack.Push(new ReactivateOperation(r, $"Verified {r.UserName} (#{r.ReservationId})"));
         return new OperationResult(true, $"{r.UserName} is verified. The reservation is now Occupied.");
     }
 
@@ -126,9 +140,46 @@ public class ReservationSearchService
                 $"{Clock(conflict.StartTime)}-{Clock(conflict.EndTime)}) for the same spot.");
 
         string before = Describe(r);
+        var undo = new RescheduleOperation(r,
+            $"Updated reservation #{r.ReservationId} ({r.UserName})");   // captures the old values
+
         ApplyChange(r, x => x.Reschedule(spotOrRoom, isDiscussionRoom, date, startTime, endTime));
         Log(OperationType.Update, r, $"{before}  ->  {Describe(r)}");
+        _undoStack.Push(undo);
         return new OperationResult(true, "Reservation updated.");
+    }
+
+    // ---------- Undo ----------
+    public string? NextUndoDescription
+        => _undoStack.IsEmpty ? null : _undoStack.Peek().Description;
+
+    public OperationResult UndoLast()
+    {
+        if (_undoStack.IsEmpty)
+            return new OperationResult(false, "There is nothing to undo.");
+
+        UndoableOperation operation = _undoStack.Peek();
+        Reservation r = operation.Reservation;
+
+        // Something else changed this reservation since (for example it was marked completed).
+        if (!operation.StillApplies)
+        {
+            _undoStack.Pop();
+            return new OperationResult(false,
+                $"Can't undo: reservation #{r.ReservationId} is now {r.Status}, so this action no longer applies.");
+        }
+
+        // Make sure nobody else took the slot this reservation would return to.
+        var slot = operation.SlotAfterUndo;
+        Reservation? conflict = FindConflict(r, slot.Spot, slot.Date.Date, slot.Start, slot.End);
+        if (conflict != null)
+            return new OperationResult(false,
+                $"Can't undo: the slot was taken by reservation #{conflict.ReservationId} ({conflict.UserName}).");
+
+        _undoStack.Pop();
+        ApplyChange(r, _ => operation.Revert());
+        Log(OperationType.Undo, r, $"Undid: {operation.Description}");
+        return new OperationResult(true, $"Undone: {operation.Description}");
     }
 
     // ---------- Activity log ----------
@@ -137,15 +188,15 @@ public class ReservationSearchService
         => _activityLog.ToList().Take(count).ToList();
 
     // ---------- Internals ----------
-    private bool ChangeStatus(int id, ReservationStatus mustBe, Action<Reservation> change,
-                              OperationType operation, string details)
+    private Reservation? ChangeStatus(int id, ReservationStatus mustBe, Action<Reservation> change,
+                                      OperationType operation, string details)
     {
         Reservation? r = FindById(id);
-        if (r == null || r.Status != mustBe) return false;
+        if (r == null || r.Status != mustBe) return null;
 
         ApplyChange(r, change);
         Log(operation, r, details);
-        return true;
+        return r;
     }
 
     // Take the reservation out of every index, change it, put it back.

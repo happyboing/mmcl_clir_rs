@@ -1,6 +1,6 @@
 ﻿namespace MMCL_CLIRRS;
 
-public enum OperationType { Cancel, Expire, Complete, Update, Verify, VerifyFailed }
+public enum OperationType { Cancel, Expire, Complete, Update, Verify, VerifyFailed, Undo }
 
 public class ActivityLogEntry
 {

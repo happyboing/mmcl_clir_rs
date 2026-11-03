@@ -43,6 +43,7 @@
             btnActivityLog = new Button();
             btnVerify = new Button();
             btnUpdate = new Button();
+            btnUndo = new Button();
             ((System.ComponentModel.ISupportInitialize)dgvReservations).BeginInit();
             pnlHeader.SuspendLayout();
             SuspendLayout();
@@ -230,11 +231,27 @@
             btnUpdate.Text = "Update";
             btnUpdate.UseVisualStyleBackColor = false;
             // 
+            // btnUndo
+            // 
+            btnUndo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            btnUndo.BackColor = Color.White;
+            btnUndo.Cursor = Cursors.Hand;
+            btnUndo.FlatStyle = FlatStyle.Flat;
+            btnUndo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnUndo.ForeColor = Color.FromArgb(183, 28, 28);
+            btnUndo.Location = new Point(528, 558);
+            btnUndo.Name = "btnUndo";
+            btnUndo.Size = new Size(150, 36);
+            btnUndo.TabIndex = 14;
+            btnUndo.Text = "Undo Last";
+            btnUndo.UseVisualStyleBackColor = false;
+            // 
             // ReservationSearchForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(984, 636);
+            Controls.Add(btnUndo);
             Controls.Add(btnUpdate);
             Controls.Add(btnVerify);
             Controls.Add(btnActivityLog);
@@ -278,5 +295,6 @@
         private Button btnActivityLog;
         private Button btnVerify;
         private Button btnUpdate;
+        private Button btnUndo;
     }
 }

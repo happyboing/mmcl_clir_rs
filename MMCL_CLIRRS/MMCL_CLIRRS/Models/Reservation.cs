@@ -62,4 +62,5 @@ public class Reservation
     public void MarkExpired() => Status = ReservationStatus.Expired;
     public void MarkOccupied() => Status = ReservationStatus.Occupied;
     public void MarkCompleted() => Status = ReservationStatus.Completed;
+    public void Reactivate() => Status = ReservationStatus.Active;
 }

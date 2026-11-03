@@ -24,6 +24,7 @@ public partial class ReservationSearchForm : Form
         btnVerify.Click += btnVerify_Click;
         btnUpdate.Click += btnUpdate_Click;
         btnActivityLog.Click += btnActivityLog_Click;
+        btnUndo.Click += btnUndo_Click;
 
         AcceptButton = btnSearch;                          // Enter key triggers Search
         _currentSearch = _service.GetAllChronological;     // what "refresh" means at startup
@@ -145,7 +146,7 @@ public partial class ReservationSearchForm : Form
             "Confirm cancellation", MessageBoxButtons.YesNo);
         if (confirm != DialogResult.Yes) return;
 
-        if (_service.Cancel(selected.ReservationId))
+        if (_service.Cancel(selected.ReservationId, undoable: true))
             ShowResults(_currentSearch());
         else
             MessageBox.Show("Only active reservations can be cancelled.");
@@ -178,6 +179,24 @@ public partial class ReservationSearchForm : Form
         OperationResult result = _service.Verify(selected.ReservationId, entered);
 
         MessageBox.Show(result.Message, result.Success ? "Verified" : "Verification failed",
+            MessageBoxButtons.OK, result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
+
+        if (result.Success) ShowResults(_currentSearch());
+    }
+    private void btnUndo_Click(object? sender, EventArgs e)
+    {
+        string? next = _service.NextUndoDescription;
+        if (next == null)
+        {
+            MessageBox.Show("There is nothing to undo.");
+            return;
+        }
+
+        DialogResult confirm = MessageBox.Show($"Undo: {next}?", "Confirm undo", MessageBoxButtons.YesNo);
+        if (confirm != DialogResult.Yes) return;
+
+        OperationResult result = _service.UndoLast();
+        MessageBox.Show(result.Message, result.Success ? "Undone" : "Can't undo",
             MessageBoxButtons.OK, result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
         if (result.Success) ShowResults(_currentSearch());
