@@ -123,6 +123,22 @@ public class SeatMapForm : Form
             Font = new Font("Segoe UI", 9)
         });
 
+        var btnHome = new Button
+        {
+            Text = "← Back to Home",
+            Location = new Point(ClientSize.Width - 156, 14),
+            Size = new Size(140, 32),
+            BackColor = Color.White,
+            ForeColor = Maroon,
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+        btnHome.FlatAppearance.BorderSize = 0;
+        btnHome.Click += (s, e) => Close();
+        header.Controls.Add(btnHome);
+
         Controls.Add(header);
     }
 

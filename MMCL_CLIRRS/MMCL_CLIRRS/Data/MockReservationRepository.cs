@@ -28,7 +28,7 @@ public class MockReservationRepository : IReservationRepository
                 userName: names[i % names.Length],
                 userIdNumber: $"2023-{100000 + i}",
                 userType: i % 6 == 0 ? UserType.Faculty : UserType.Student,
-                department: "School of Information Technology",
+                department: "CCIS",
                 program: "BSIT",
                 yearLevel: 1 + (i % 4),
                 spotOrRoom: spot,

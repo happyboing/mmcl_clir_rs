@@ -82,15 +82,12 @@ public class ReserveSpotDialog : Form
         _cmbUserType.SelectedIndex = 0;
         AddRow("I am a:", _cmbUserType, 222);
 
-        _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDown;
+        _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbDepartment.Items.AddRange(new object[]
         {
-            "School of Information Technology",
-            "School of Engineering",
-            "School of Architecture, Industrial Design and the Built Environment",
-            "School of Management",
-            "School of Health Sciences"
+            "CAS", "CCIS", "CHS", "CMET", "ETYCB", "MIA", "MITL", "SHS"
         });
+        _cmbDepartment.SelectedIndex = 0;
         AddRow("Department:", _cmbDepartment, 260);
         AddRow("Program:", _txtProgram, 298);
 
