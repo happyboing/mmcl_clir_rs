@@ -114,8 +114,9 @@ public static class ClirMapLayout
                 PieBounds));
         }
 
-        // Four bean bags along the top wall.
-        for (int i = 0; i < 4; i++)
+        // Five larger bean bags along the top wall. They are separate
+        // seats and are not placed on top of the tables.
+        for (int i = 0; i < ClirLayout.BeanBagCount; i++)
         {
             spots.Add(new ClirMapSpot(
                 $"Bean Bag {i + 1}",
@@ -123,19 +124,20 @@ public static class ClirMapLayout
                 "—",
                 "Window Area",
                 i + 1,
-                new Rectangle(252 + i * 46, 8, 40, 44)));
+                new Rectangle(225 + i * 68, 8, 56, 58)));
         }
 
-        // Four bean bags on the row of small tables.
-        for (int i = 0; i < 4; i++)
+        // Five small tables in a row, each with one reservable seat.
+        for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
+            int cellX = 210 + i * 62;
             spots.Add(new ClirMapSpot(
-                $"Bean Bag {i + 5}",
-                ClirSpotKind.BeanBag,
-                "—",
+                $"Bean Bag Table Seat {i + 1}",
+                ClirSpotKind.Seat,
+                $"Bean Bag Table {i + 1}",
                 "Main Reading Area",
-                i + 5,
-                new Rectangle(249 + i * 62, 147, 40, 44)));
+                1,
+                new Rectangle(cellX + 7, 209, SeatControlWidth, SeatControlHeight)));
         }
 
         // Couches in the middle and along the bottom.
@@ -171,7 +173,7 @@ public static class ClirMapLayout
                 "—",
                 "Discussion Room Wing",
                 0,
-                new Rectangle(776, 300, RoomWidth, RoomHeight)));
+                new Rectangle(776, 195, RoomWidth, RoomHeight)));
         }
 
         return spots;

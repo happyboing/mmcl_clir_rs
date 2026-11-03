@@ -73,7 +73,14 @@ public sealed class SeatSpotControl : Control
     }
 
     private Rectangle BeanBagBounds
-        => new Rectangle((Width - 32) / 2, 0, 32, 28);
+    {
+        get
+        {
+            int width = Math.Min(46, Width - 10);
+            int height = Math.Min(38, Height - 20);
+            return new Rectangle((Width - width) / 2, 0, width, height);
+        }
+    }
 
     private Rectangle FurnitureBodyBounds
         => new Rectangle(0, 0, Width - 1, Height - 18);
@@ -94,7 +101,7 @@ public sealed class SeatSpotControl : Control
             int width = Spot.Kind switch
             {
                 ClirSpotKind.Seat or ClirSpotKind.MonitorSeat => Math.Min(36, Width - 6),
-                ClirSpotKind.BeanBag => Math.Min(34, Width - 6),
+                ClirSpotKind.BeanBag => Math.Min(46, Width - 6),
                 _ => Width - 8
             };
 
@@ -186,7 +193,7 @@ public sealed class SeatSpotControl : Control
         g.FillEllipse(fillBrush, body);
         g.DrawEllipse(linePen, body);
 
-        using var font = new Font("Segoe UI", 5.5f, FontStyle.Bold);
+        using var font = new Font("Segoe UI", 6.5f, FontStyle.Bold);
         using var textBrush = new SolidBrush(text);
         using var format = new StringFormat
         {

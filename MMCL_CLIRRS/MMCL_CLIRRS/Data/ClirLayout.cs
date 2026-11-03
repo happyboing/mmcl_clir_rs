@@ -11,7 +11,8 @@ public static class ClirLayout
     public const int MonitorSeatCount = 5;
     public const int PieSeatCount = 8;
     public const int CouchCount = 3;
-    public const int BeanBagCount = 8;
+    public const int BeanBagCount = 5;
+    public const int BeanBagTableCount = 5;
     public const int FloorChairCount = 3;
 
     // Every reservable seat, couch, bean bag and table.
@@ -33,6 +34,9 @@ public static class ClirLayout
 
         for (int i = 1; i <= BeanBagCount; i++)
             seats.Add($"Bean Bag {i}");
+
+        for (int i = 1; i <= BeanBagTableCount; i++)
+            seats.Add($"Bean Bag Table Seat {i}");
 
         for (int i = 1; i <= CouchCount; i++)
             seats.Add($"Couch {i}");

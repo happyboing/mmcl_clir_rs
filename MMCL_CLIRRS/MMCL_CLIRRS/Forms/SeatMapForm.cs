@@ -427,21 +427,21 @@ public class SeatMapForm : Form
         // Reading-area labels, matching the labels on the CLIR sketch.
         g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(24, 190));
         g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(172, 474));
-        g.DrawString("DISCUSSION ROOM", faintFont, faintBrush, new PointF(780, 270));
+        g.DrawString("DISCUSSION ROOM", faintFont, faintBrush, new PointF(780, 165));
 
-        // Tilted "table with monitors" in the upper-left corner.
+        // Straight "table with monitors" in the upper-left corner.
         DrawMonitorTable(g);
 
-        // Background table cells under the four bean-bag seats.
-        for (int i = 0; i < 4; i++)
+        // Five small tables, each with one seat underneath.
+        for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
-            var cell = new Rectangle(240 + i * 62, 145, 58, 58);
+            var cell = new Rectangle(210 + i * 62, 145, 58, 58);
             using GraphicsPath cellPath = RoundedRect(cell, 5);
             g.FillPath(furnitureBrush, cellPath);
             g.DrawPath(furniturePen, cellPath);
 
             g.DrawString("table", tinyFont, Brushes.DimGray,
-                new RectangleF(cell.X, cell.Bottom + 2, cell.Width, 14), centerFormat);
+                new RectangleF(cell.X, cell.Bottom - 16, cell.Width, 14), centerFormat);
         }
 
         // Round tables with their names.
@@ -459,12 +459,12 @@ public class SeatMapForm : Form
         }
 
         // The discussion room is the only room in the wing.
-        using (GraphicsPath roomWing = RoundedRect(new Rectangle(770, 285, 112, 220), 8))
+        using (GraphicsPath wingPath = RoundedRect(new Rectangle(770, 180, 112, 220), 8))
         {
             using var roomFill = new SolidBrush(Color.FromArgb(245, 245, 245));
             using var roomPen = new Pen(Color.FromArgb(90, 90, 90), 2.5f);
-            g.FillPath(roomFill, roomWing);
-            g.DrawPath(roomPen, roomWing);
+            g.FillPath(roomFill, wingPath);
+            g.DrawPath(roomPen, wingPath);
         }
 
         // Short wall separating the reading area from the right-hand wing.
@@ -483,21 +483,15 @@ public class SeatMapForm : Form
         using var labelFont = new Font("Segoe UI", 7.5f, FontStyle.Bold);
         using var labelBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
 
-        GraphicsState state = g.Save();
-        g.TranslateTransform(130, 95);
-        g.RotateTransform(-18);
-
-        using (GraphicsPath tablePath = RoundedRect(new Rectangle(-88, -20, 176, 40), 6))
-        {
-            g.FillPath(fill, tablePath);
-            g.DrawPath(line, tablePath);
-        }
+        var table = new Rectangle(45, 70, 180, 40);
+        using GraphicsPath tablePath = RoundedRect(table, 6);
+        g.FillPath(fill, tablePath);
+        g.DrawPath(line, tablePath);
 
         for (int i = 0; i < 5; i++)
-            g.FillRectangle(monitorBrush, -72 + i * 30, -12, 20, 12);
+            g.FillRectangle(monitorBrush, 55 + i * 32, 84, 20, 12);
 
-        g.Restore(state);
-        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(55, 55));
+        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(55, 48));
     }
 
     private static void DrawFurniture(Graphics g, Rectangle bounds, string text, float fontSize = 8.5f)
