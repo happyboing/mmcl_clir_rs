@@ -1,27 +1,58 @@
 namespace MMCL_CLIRRS;
 
 // The list of every seat and room inside the CLIR.
-// Want more tables or rooms? Change the three numbers below.
-// (Functionality #3's seat map can read from here too.)
+// This is shared by the reservation form and the interactive seat map.
 public static class ClirLayout
 {
     public const int TableCount = 5;
     public const int SeatsPerTable = 4;
-    public const int DiscussionRoomCount = 3;
+    public const int DiscussionRoomCount = 1;
 
-    // "Table 1 - Seat 1", "Table 1 - Seat 2", ... (same naming as the sample data)
+    public const int MonitorSeatCount = 5;
+    public const int PieSeatCount = 8;
+    public const int CouchCount = 3;
+    public const int BeanBagCount = 10;
+    public const int BeanBagTableCount = 5;
+    public const int FloorChairCount = 3;
+    public const int FloorAreaCount = 2;
+
+    // Every reservable seat, couch, bean bag and table.
     public static List<string> GetSeats()
     {
         var seats = new List<string>();
+
         for (int table = 1; table <= TableCount; table++)
         {
             for (int seat = 1; seat <= SeatsPerTable; seat++)
                 seats.Add($"Table {table} - Seat {seat}");
         }
+
+        for (int i = 1; i <= MonitorSeatCount; i++)
+            seats.Add($"Monitor Seat {i}");
+
+        for (int i = 1; i <= PieSeatCount; i++)
+            seats.Add($"Pie Seat {i}");
+
+        for (int i = 1; i <= BeanBagCount; i++)
+            seats.Add($"Bean Bag {i}");
+
+        for (int i = 1; i <= BeanBagTableCount; i++)
+            seats.Add($"Bean Bag Table Seat {i}");
+
+        for (int i = 1; i <= CouchCount; i++)
+            seats.Add($"Couch {i}");
+
+        for (int i = 1; i <= FloorChairCount; i++)
+            seats.Add($"Floor Chair {i}");
+
+        for (int i = 1; i <= FloorAreaCount; i++)
+            seats.Add($"Floor Area {i}");
+
+        seats.Add("Small Table");
         return seats;
     }
 
-    // "Discussion Room 1", "Discussion Room 2", ...
+    // The CLIR sketch has one discussion room.
     public static List<string> GetDiscussionRooms()
     {
         var rooms = new List<string>();

@@ -36,31 +36,48 @@ public class MainMenuForm : Form
             TextAlign = ContentAlignment.MiddleCenter
         });
 
-        Button btnReserve = MakeMenuButton("Reserve a Seat or Room", 100);
-        Button btnCancel = MakeMenuButton("Cancel My Reservation", 170);
-        Button btnStaff = MakeMenuButton("Staff: Search and Manage Reservations", 240);
+        Button btnMap = MakeMenuButton("Interactive Seat Map", 100);
+        Button btnStaff = MakeMenuButton("Staff: Search and Manage Reservations", 170);
+        Button btnStats = MakeMenuButton("Staff: Reservation Statistics and Reports", 240);
+        btnStats.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
-        btnReserve.Click += (s, e) => { using var f = new MakeReservationForm(_management); f.ShowDialog(this); };
-        btnCancel.Click += (s, e) => { using var f = new CancelReservationForm(_management); f.ShowDialog(this); };
+        btnMap.Click += (s, e) => { using var f = new SeatMapForm(_management); f.ShowDialog(this); };
         btnStaff.Click += (s, e) => OpenStaffScreen();
+        btnStats.Click += (s, e) => OpenStatisticsScreen();
 
-        Controls.Add(btnReserve);
-        Controls.Add(btnCancel);
+        Controls.Add(btnMap);
         Controls.Add(btnStaff);
+        Controls.Add(btnStats);
     }
 
-    // Students never see the staff screen: it opens only after the correct PIN.
+    // Students never see staff screens: they open only after the correct PIN.
     private void OpenStaffScreen()
+    {
+        if (!TryStaffAccess()) return;
+
+        using var form = new ReservationSearchForm(_search);
+        form.ShowDialog(this);
+    }
+
+    private void OpenStatisticsScreen()
+    {
+        if (!TryStaffAccess()) return;
+
+        using var form = new ReservationStatisticsForm(_search);
+        form.ShowDialog(this);
+    }
+
+    private bool TryStaffAccess()
     {
         if (_staffAccess.IsLockedOut(out int secondsLeft))
         {
             MessageBox.Show($"Too many wrong attempts. Please try again in {secondsLeft} seconds.", "Locked");
-            return;
+            return false;
         }
 
         string? pin = PromptDialog.Show(this, "Staff Access", "Enter the staff PIN:",
                                         maskInput: true, okText: "Enter");
-        if (pin == null) return;   // cancelled
+        if (pin == null) return false;   // cancelled
 
         if (!_staffAccess.TryUnlock(pin))
         {
@@ -69,11 +86,10 @@ public class MainMenuForm : Form
                     ? $"Too many wrong attempts. Locked for {wait} seconds."
                     : "Incorrect PIN.",
                 "Access denied");
-            return;
+            return false;
         }
 
-        using var form = new ReservationSearchForm(_search);
-        form.ShowDialog(this);
+        return true;
     }
 
     private static Button MakeMenuButton(string text, int y)

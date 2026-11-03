@@ -9,6 +9,7 @@ public partial class ReservationSearchForm : Form
     {
         InitializeComponent();
         ApplyGridTheme();
+        AddBackToHomeButton();
         _service = service;
 
         cmbFilter.Items.AddRange(new object[]
@@ -31,6 +32,26 @@ public partial class ReservationSearchForm : Form
 
         UpdateInputVisibility();
         ShowResults(_service.GetAllChronological());
+    }
+
+    private void AddBackToHomeButton()
+    {
+        var btnHome = new Button
+        {
+            Text = "← Back to Home",
+            Location = new Point(pnlHeader.Width - 156, 14),
+            Size = new Size(140, 32),
+            BackColor = Color.White,
+            ForeColor = Color.FromArgb(183, 28, 28),
+            FlatStyle = FlatStyle.Flat,
+            Cursor = Cursors.Hand,
+            Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+            Anchor = AnchorStyles.Top | AnchorStyles.Right
+        };
+        btnHome.FlatAppearance.BorderSize = 0;
+        btnHome.Click += (s, e) => Close();
+        pnlHeader.Controls.Add(btnHome);
+        btnHome.BringToFront();
     }
 
     // Show date pickers only for date searches, the text box for the rest.

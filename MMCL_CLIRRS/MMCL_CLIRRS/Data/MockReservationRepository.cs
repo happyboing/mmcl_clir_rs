@@ -15,7 +15,7 @@ public class MockReservationRepository : IReservationRepository
         string[] spots =
         {
             "Table 1 - Seat 1", "Table 1 - Seat 2", "Table 2 - Seat 1",
-            "Table 3 - Seat 4", "Discussion Room 1", "Discussion Room 2"
+            "Table 3 - Seat 4", "Discussion Room 1", "Couch 1"
         };
 
         for (int i = 0; i < 20; i++)
@@ -28,8 +28,8 @@ public class MockReservationRepository : IReservationRepository
                 userName: names[i % names.Length],
                 userIdNumber: $"2023-{100000 + i}",
                 userType: i % 6 == 0 ? UserType.Faculty : UserType.Student,
-                department: "School of Information Technology",
-                program: "BSIT",
+                department: "CCIS",
+                program: "IT",
                 yearLevel: 1 + (i % 4),
                 spotOrRoom: spot,
                 isDiscussionRoom: spot.StartsWith("Discussion"),
