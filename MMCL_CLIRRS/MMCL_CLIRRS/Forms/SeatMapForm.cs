@@ -15,6 +15,7 @@ public class SeatMapForm : Form
     private static readonly Color PageBackground = Color.FromArgb(246, 247, 249);
     private static readonly Color Ink = Color.FromArgb(38, 50, 56);
 
+    private readonly ReservationManagementService _management;
     private readonly SeatMapService _service;
 
     private readonly Panel _mapPanel = new BufferedPanel();
@@ -36,6 +37,7 @@ public class SeatMapForm : Form
     private readonly Label _lblReservedBy = new Label();
     private readonly Label _lblSchedule = new Label();
     private readonly ListBox _lstSchedule = new ListBox();
+    private readonly Button _btnReserveSpot = new Button();
     private readonly Button _btnCancelSpot = new Button();
 
     private readonly System.Windows.Forms.Timer _refreshTimer = new();
@@ -47,6 +49,7 @@ public class SeatMapForm : Form
 
     public SeatMapForm(ReservationManagementService management)
     {
+        _management = management;
         _service = new SeatMapService(management);
 
         Text = "CLIR Interactive Seat Map";
@@ -301,7 +304,20 @@ public class SeatMapForm : Form
         _lblSchedule.ForeColor = Color.DimGray;
         panel.Controls.Add(_lblSchedule);
 
-        _btnCancelSpot.Text = "Cancel this reservation";
+        _btnReserveSpot.Text = "Reserve This Spot";
+        _btnReserveSpot.Location = new Point(12, 306);
+        _btnReserveSpot.Size = new Size(326, 36);
+        _btnReserveSpot.BackColor = Color.SeaGreen;
+        _btnReserveSpot.ForeColor = Color.White;
+        _btnReserveSpot.FlatStyle = FlatStyle.Flat;
+        _btnReserveSpot.Cursor = Cursors.Hand;
+        _btnReserveSpot.Font = new Font("Segoe UI", 10, FontStyle.Bold);
+        _btnReserveSpot.FlatAppearance.BorderColor = Color.SeaGreen;
+        _btnReserveSpot.Visible = false;
+        _btnReserveSpot.Click += BtnReserveSpot_Click;
+        panel.Controls.Add(_btnReserveSpot);
+
+        _btnCancelSpot.Text = "Cancel My Reservation";
         _btnCancelSpot.Location = new Point(12, 306);
         _btnCancelSpot.Size = new Size(326, 36);
         _btnCancelSpot.BackColor = Maroon;
@@ -337,8 +353,8 @@ public class SeatMapForm : Form
 
         panel.Controls.Add(new Label
         {
-            Text = "Select a spot on the map. Reserved seats show a Cancel button below them " +
-                   "and their details appear here.",
+            Text = "Select a spot on the map. Available spots can be reserved here, " +
+                   "and reserved spots can be cancelled from this panel.",
             Location = new Point(12, 500),
             Size = new Size(326, 46),
             ForeColor = Color.DimGray,
@@ -595,6 +611,7 @@ public class SeatMapForm : Form
             _lblReservedBy.Text = "";
             _lblSchedule.Text = "";
             _lblSchedule.ForeColor = Color.DimGray;
+            _btnReserveSpot.Visible = false;
             _btnCancelSpot.Visible = false;
             _lstSchedule.Items.Clear();
             _lstSchedule.Items.Add("(select a spot to see its schedule)");
@@ -628,6 +645,7 @@ public class SeatMapForm : Form
                     ? ""
                     : $"Reservation #{snapshot.Reservation.ReservationId}  •  " +
                       $"{Clock(snapshot.Reservation.StartTime)} - {Clock(snapshot.Reservation.EndTime)}";
+                _btnReserveSpot.Visible = false;
                 _btnCancelSpot.Visible = true;
                 break;
 
@@ -642,6 +660,7 @@ public class SeatMapForm : Form
                     ? ""
                     : $"Reservation #{snapshot.Reservation.ReservationId}  •  " +
                       $"{Clock(snapshot.Reservation.StartTime)} - {Clock(snapshot.Reservation.EndTime)}";
+                _btnReserveSpot.Visible = false;
                 _btnCancelSpot.Visible = false;
                 break;
 
@@ -651,6 +670,7 @@ public class SeatMapForm : Form
                 _lblCurrent.Text = "Available at this time";
                 _lblReservedBy.Text = "No reservation is holding this spot.";
                 _lblSchedule.Text = "";
+                _btnReserveSpot.Visible = true;
                 _btnCancelSpot.Visible = false;
                 break;
         }
@@ -678,6 +698,27 @@ public class SeatMapForm : Form
                 $"{Clock(reservation.StartTime)}-{Clock(reservation.EndTime)}  {status}  " +
                 $"{reservation.UserName}");
         }
+    }
+
+    private void BtnReserveSpot_Click(object? sender, EventArgs e)
+    {
+        if (_selectedSpot == null) return;
+
+        using var dialog = new ReserveSpotDialog(
+            _management,
+            _selectedSpot,
+            _dtpDate.Value.Date,
+            _dtpTime.Value.TimeOfDay);
+
+        if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+        // Show the map at the time that was actually reserved.
+        _updatingPickers = true;
+        _dtpDate.Value = dialog.ReservationDate;
+        _dtpTime.Value = DateTime.Today.Add(dialog.ReservationStart);
+        _updatingPickers = false;
+        _followingNow = false;
+        RefreshMap();
     }
 
     private void BtnCancelSpot_Click(object? sender, EventArgs e)

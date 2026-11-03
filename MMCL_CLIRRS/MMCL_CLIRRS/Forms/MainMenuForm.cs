@@ -23,7 +23,7 @@ public class MainMenuForm : Form
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(420, 430);
+        ClientSize = new Size(420, 290);
 
         Controls.Add(new Label
         {
@@ -36,19 +36,13 @@ public class MainMenuForm : Form
             TextAlign = ContentAlignment.MiddleCenter
         });
 
-        Button btnReserve = MakeMenuButton("Reserve a Seat or Room", 100);
-        Button btnMap = MakeMenuButton("Interactive Seat Map", 170);
-        Button btnCancel = MakeMenuButton("Cancel My Reservation", 240);
-        Button btnStaff = MakeMenuButton("Staff: Search and Manage Reservations", 310);
+        Button btnMap = MakeMenuButton("Interactive Seat Map", 110);
+        Button btnStaff = MakeMenuButton("Staff: Search and Manage Reservations", 180);
 
-        btnReserve.Click += (s, e) => { using var f = new MakeReservationForm(_management); f.ShowDialog(this); };
         btnMap.Click += (s, e) => { using var f = new SeatMapForm(_management); f.ShowDialog(this); };
-        btnCancel.Click += (s, e) => { using var f = new CancelReservationForm(_management); f.ShowDialog(this); };
         btnStaff.Click += (s, e) => OpenStaffScreen();
 
-        Controls.Add(btnReserve);
         Controls.Add(btnMap);
-        Controls.Add(btnCancel);
         Controls.Add(btnStaff);
     }
 
