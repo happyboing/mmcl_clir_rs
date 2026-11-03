@@ -11,7 +11,7 @@ public static class ClirLayout
     public const int MonitorSeatCount = 5;
     public const int PieSeatCount = 8;
     public const int CouchCount = 3;
-    public const int BeanBagCount = 5;
+    public const int BeanBagCount = 10;
     public const int BeanBagTableCount = 5;
     public const int FloorChairCount = 3;
     public const int FloorAreaCount = 2;

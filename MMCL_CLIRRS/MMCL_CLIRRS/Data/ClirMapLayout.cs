@@ -13,8 +13,8 @@ public static class ClirMapLayout
 
     public const int SeatControlWidth = 44;
     public const int SeatControlHeight = 46;
-    public const int MonitorSeatWidth = 32;
-    public const int MonitorSeatHeight = 40;
+    public const int MonitorSeatWidth = 36;
+    public const int MonitorSeatHeight = 44;
     public const int RoomWidth = 100;
     public const int RoomHeight = 190;
 
@@ -29,7 +29,7 @@ public static class ClirMapLayout
         new Point(100, 430),   // Table 2 - lower-left floor area
         new Point(335, 370),   // Table 3 - large centre table
         new Point(650, 330),   // Table 4 - large right-side table
-        new Point(600, 155)    // Table 5 - top-right table
+        new Point(680, 155)    // Table 5 - top-right table
     };
 
     public static IReadOnlyList<ClirMapSpot> Spots { get; } = BuildSpots();
@@ -88,7 +88,7 @@ public static class ClirMapLayout
         for (int i = 0; i < ClirLayout.MonitorSeatCount; i++)
         {
             var bounds = new Rectangle(
-                40 + i * 35 - (MonitorSeatWidth / 2),
+                38 + i * 36 - (MonitorSeatWidth / 2),
                 130 - 12,
                 MonitorSeatWidth,
                 MonitorSeatHeight);
@@ -115,7 +115,7 @@ public static class ClirMapLayout
         }
 
         // Five larger bean bags along the top wall.
-        for (int i = 0; i < ClirLayout.BeanBagCount; i++)
+        for (int i = 0; i < 5; i++)
         {
             spots.Add(new ClirMapSpot(
                 $"Bean Bag {i + 1}",
@@ -126,26 +126,39 @@ public static class ClirMapLayout
                 new Rectangle(210 + i * 62, 8, 56, 58)));
         }
 
-        // Five small tables in a row, each with one bean-bag seat above it.
+        // Another five bean bags above the row of small tables.
+        for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
+        {
+            int cellX = 210 + i * 62;
+            spots.Add(new ClirMapSpot(
+                $"Bean Bag {i + 6}",
+                ClirSpotKind.BeanBag,
+                "—",
+                "Main Reading Area",
+                i + 6,
+                new Rectangle(cellX + 1, 80, 56, 58)));
+        }
+
+        // Five small tables, each with one solo seat below it.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
             int cellX = 210 + i * 62;
             spots.Add(new ClirMapSpot(
                 $"Bean Bag Table Seat {i + 1}",
-                ClirSpotKind.BeanBag,
+                ClirSpotKind.Seat,
                 $"Bean Bag Table {i + 1}",
                 "Main Reading Area",
                 1,
-                new Rectangle(cellX + 1, 80, 56, 58)));
+                new Rectangle(cellX + 7, 209, SeatControlWidth, SeatControlHeight)));
         }
 
         // Couches in the middle and along the bottom.
         spots.Add(new ClirMapSpot("Couch 1", ClirSpotKind.Couch, "—", "Lounge Area", 1,
-            new Rectangle(470, 350, 38, 140)));
+            new Rectangle(464, 350, 46, 140)));
         spots.Add(new ClirMapSpot("Couch 2", ClirSpotKind.Couch, "—", "Lounge Area", 2,
-            new Rectangle(510, 350, 38, 140)));
+            new Rectangle(514, 350, 46, 140)));
         spots.Add(new ClirMapSpot("Couch 3", ClirSpotKind.Couch, "—", "Lounge Area", 3,
-            new Rectangle(500, 496, 220, 44)));
+            new Rectangle(500, 490, 220, 60)));
 
         // Three loose floor chairs at the bottom.
         for (int i = 0; i < ClirLayout.FloorChairCount; i++)
@@ -161,9 +174,9 @@ public static class ClirMapLayout
 
         // The two open floor areas are reservable too.
         spots.Add(new ClirMapSpot("Floor Area 1", ClirSpotKind.FloorArea, "—",
-            "Floor Area", 0, new Rectangle(16, 185, 150, 40)));
+            "Floor Area", 0, new Rectangle(16, 181, 150, 44)));
         spots.Add(new ClirMapSpot("Floor Area 2", ClirSpotKind.FloorArea, "—",
-            "Floor Area", 0, new Rectangle(176, 456, 150, 40)));
+            "Floor Area", 0, new Rectangle(176, 452, 150, 44)));
 
         // The small rectangular reading table.
         spots.Add(new ClirMapSpot("Small Table", ClirSpotKind.Table, "—",

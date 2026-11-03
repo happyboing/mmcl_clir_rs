@@ -265,7 +265,7 @@ public sealed class SeatSpotControl : Control
     private void DrawFloorArea(Graphics g, Color fill, Color line, Color text)
     {
         Rectangle body = FurnitureBodyBounds;
-        using GraphicsPath path = RoundedRect(body, 8);
+        using GraphicsPath path = RoundedRect(body, 2);
         using var fillBrush = new SolidBrush(fill);
         using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
         using var font = new Font("Segoe UI", 8.5f, FontStyle.Bold);

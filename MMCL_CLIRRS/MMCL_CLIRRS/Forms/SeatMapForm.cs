@@ -439,7 +439,7 @@ public class SeatMapForm : Form
             g.DrawPath(furniturePen, cellPath);
 
             g.DrawString("Table", tinyFont, Brushes.DimGray,
-                new RectangleF(cell.X, cell.Bottom + 2, cell.Width, 14), centerFormat);
+                new RectangleF(cell.X, cell.Bottom - 16, cell.Width, 14), centerFormat);
         }
 
         // Round tables with their names.
