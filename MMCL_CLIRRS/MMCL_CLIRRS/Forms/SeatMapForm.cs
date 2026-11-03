@@ -20,6 +20,7 @@ public class SeatMapForm : Form
     private readonly Panel _mapPanel = new BufferedPanel();
     private readonly Dictionary<string, SeatSpotControl> _seatControls = new();
     private readonly Dictionary<string, SpotSnapshot> _snapshots = new();
+    private PieSpotControl? _pieControl;
 
     private readonly DateTimePicker _dtpDate = new DateTimePicker();
     private readonly DateTimePicker _dtpTime = new DateTimePicker();
@@ -218,6 +219,8 @@ public class SeatMapForm : Form
 
         foreach (ClirMapSpot spot in ClirMapLayout.Spots)
         {
+            if (spot.Kind == ClirSpotKind.PieSeat) continue;
+
             var control = new SeatSpotControl(spot);
             control.SpotClicked += SeatControl_SpotClicked;
             control.CancelClicked += SeatControl_CancelClicked;
@@ -225,6 +228,15 @@ public class SeatMapForm : Form
             _mapPanel.Controls.Add(control);
 
             _toolTip.SetToolTip(control, $"{spot.SpotOrRoom}\n{spot.Area}");
+        }
+
+        if (ClirMapLayout.PieSeats.Count > 0)
+        {
+            _pieControl = new PieSpotControl(ClirMapLayout.PieSeats);
+            _pieControl.SpotClicked += spot => SelectSpot(spot);
+            _pieControl.CancelClicked += PieControl_CancelClicked;
+            _mapPanel.Controls.Add(_pieControl);
+            _toolTip.SetToolTip(_pieControl, "Pie seats 1-8\nEight seats around the circular table");
         }
     }
 
@@ -399,15 +411,12 @@ public class SeatMapForm : Form
 
         using var faintFont = new Font("Segoe UI", 8f, FontStyle.Regular);
         using var tinyFont = new Font("Segoe UI", 6.4f, FontStyle.Bold);
-        using var cellBeanFont = new Font("Segoe UI", 5.5f, FontStyle.Bold);
         using var boldFont = new Font("Segoe UI", 8f, FontStyle.Bold);
         using var faintBrush = new SolidBrush(Color.FromArgb(150, 150, 150));
         using var furnitureBrush = new SolidBrush(Color.FromArgb(224, 224, 224));
         using var furniturePen = new Pen(Color.FromArgb(90, 90, 90), 2f);
         using var tableBrush = new SolidBrush(Color.FromArgb(236, 239, 241));
         using var tablePen = new Pen(Color.FromArgb(96, 125, 139), 2f);
-        using var beanBrush = new SolidBrush(Color.FromArgb(228, 228, 228));
-        using var beanPen = new Pen(Color.FromArgb(110, 110, 110), 1.4f);
         using var dividerPen = new Pen(Color.FromArgb(110, 110, 110), 2f);
         using var centerFormat = new StringFormat
         {
@@ -423,11 +432,7 @@ public class SeatMapForm : Form
         // Tilted "table with monitors" in the upper-left corner.
         DrawMonitorTable(g);
 
-        // Four bean bags along the top wall.
-        for (int i = 0; i < 4; i++)
-            DrawBeanBag(g, new Rectangle(252 + i * 46, 8, 40, 38), tinyFont, beanBrush, beanPen);
-
-        // Four bean bags resting on a row of small tables.
+        // Background table cells under the four bean-bag seats.
         for (int i = 0; i < 4; i++)
         {
             var cell = new Rectangle(240 + i * 62, 145, 58, 58);
@@ -435,15 +440,9 @@ public class SeatMapForm : Form
             g.FillPath(furnitureBrush, cellPath);
             g.DrawPath(furniturePen, cellPath);
 
-            DrawBeanBag(g, new Rectangle(cell.X + 14, cell.Y + 5, 30, 27),
-                cellBeanFont, beanBrush, beanPen);
-
             g.DrawString("table", tinyFont, Brushes.DimGray,
-                new RectangleF(cell.X, cell.Bottom - 17, cell.Width, 14), centerFormat);
+                new RectangleF(cell.X, cell.Bottom + 2, cell.Width, 14), centerFormat);
         }
-
-        // Decorative round object between the left tables and the centre table.
-        DrawFan(g, 200, 310);
 
         // Round tables with their names.
         int[] radii = { 28, 28, 38, 36, 34 };
@@ -459,23 +458,8 @@ public class SeatMapForm : Form
                 new RectangleF(table.X, table.Y, table.Width, table.Height), centerFormat);
         }
 
-        // Couches in the middle/bottom area.
-        DrawFurniture(g, new Rectangle(470, 350, 38, 140), "couch", 7f);
-        DrawFurniture(g, new Rectangle(510, 350, 38, 140), "couch", 7f);
-        DrawFurniture(g, new Rectangle(500, 500, 220, 36), "couch", 8f);
-
-        // Three loose chairs at the bottom.
-        DrawFurniture(g, new Rectangle(230, 505, 55, 30), "chair", 7f);
-        DrawFurniture(g, new Rectangle(295, 505, 55, 30), "chair", 7f);
-        DrawFurniture(g, new Rectangle(360, 505, 55, 30), "chair", 7f);
-
-        // Small rectangular table near the bottom-right.
-        DrawFurniture(g, new Rectangle(585, 420, 100, 50), "table", 8f);
-
-        // Staff corner and the discussion-room block.
-        DrawFurniture(g, new Rectangle(770, 205, 110, 60), "staff", 9.5f);
-
-        using (GraphicsPath roomWing = RoundedRect(new Rectangle(770, 285, 112, 230), 8))
+        // The discussion room is the only room in the wing.
+        using (GraphicsPath roomWing = RoundedRect(new Rectangle(770, 285, 112, 220), 8))
         {
             using var roomFill = new SolidBrush(Color.FromArgb(245, 245, 245));
             using var roomPen = new Pen(Color.FromArgb(90, 90, 90), 2.5f);
@@ -489,38 +473,6 @@ public class SeatMapForm : Form
         // Entrance and exit at the bottom.
         DrawFurniture(g, new Rectangle(20, 520, 110, 28), "exit", 8.5f);
         DrawFurniture(g, new Rectangle(740, 520, 140, 28), "entrance", 8.5f);
-    }
-
-    private static void DrawBeanBag(Graphics g, Rectangle bounds, Font font, Brush fill, Pen pen)
-    {
-        g.FillEllipse(fill, bounds);
-        g.DrawEllipse(pen, bounds);
-
-        using var format = new StringFormat
-        {
-            Alignment = StringAlignment.Center,
-            LineAlignment = StringAlignment.Center
-        };
-        g.DrawString("bean bag", font, Brushes.DimGray,
-            new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height), format);
-    }
-
-    private static void DrawFan(Graphics g, int centerX, int centerY)
-    {
-        using var fill = new SolidBrush(Color.FromArgb(245, 245, 245));
-        using var pen = new Pen(Color.FromArgb(96, 125, 139), 1.6f);
-        var circle = new Rectangle(centerX - 27, centerY - 27, 54, 54);
-
-        g.FillEllipse(fill, circle);
-        g.DrawEllipse(pen, circle);
-
-        for (int i = 0; i < 8; i++)
-        {
-            double angle = i * Math.PI / 4;
-            g.DrawLine(pen, centerX, centerY,
-                centerX + (int)(26 * Math.Cos(angle)),
-                centerY + (int)(26 * Math.Sin(angle)));
-        }
     }
 
     private static void DrawMonitorTable(Graphics g)
@@ -543,9 +495,6 @@ public class SeatMapForm : Form
 
         for (int i = 0; i < 5; i++)
             g.FillRectangle(monitorBrush, -72 + i * 30, -12, 20, 12);
-
-        for (int i = 0; i < 5; i++)
-            g.FillRectangle(monitorBrush, -74 + i * 32, 22, 16, 11);
 
         g.Restore(state);
         g.DrawString("table with monitors", labelFont, labelBrush, new PointF(55, 55));
@@ -579,14 +528,19 @@ public class SeatMapForm : Form
         DateTime date = _dtpDate.Value.Date;
         TimeSpan time = _dtpTime.Value.TimeOfDay;
 
-        foreach (SeatSpotControl control in _seatControls.Values)
+        foreach (ClirMapSpot spot in ClirMapLayout.Spots)
         {
-            SpotSnapshot snapshot = _service.GetSnapshot(control.Spot, date, time);
-            _snapshots[control.Spot.SpotOrRoom] = snapshot;
-            control.UpdateState(snapshot);
-            control.IsSelected = _selectedSpot?.SpotOrRoom == control.Spot.SpotOrRoom;
+            SpotSnapshot snapshot = _service.GetSnapshot(spot, date, time);
+            _snapshots[spot.SpotOrRoom] = snapshot;
+
+            if (_seatControls.TryGetValue(spot.SpotOrRoom, out SeatSpotControl? control))
+            {
+                control.UpdateState(snapshot);
+                control.IsSelected = _selectedSpot?.SpotOrRoom == spot.SpotOrRoom;
+            }
         }
 
+        _pieControl?.UpdateStates(_snapshots, _selectedSpot);
         UpdateDetails();
         UpdateClockLabel();
     }
@@ -616,7 +570,18 @@ public class SeatMapForm : Form
         foreach (SeatSpotControl control in _seatControls.Values)
             control.IsSelected = control.Spot.SpotOrRoom == spot.SpotOrRoom;
 
+        _pieControl?.UpdateStates(_snapshots, spot);
         UpdateDetails();
+    }
+
+    private void PieControl_CancelClicked(ClirMapSpot spot)
+    {
+        if (_snapshots.TryGetValue(spot.SpotOrRoom, out SpotSnapshot? snapshot) &&
+            snapshot.Reservation != null)
+        {
+            SelectSpot(spot);
+            BeginCancel(spot, snapshot.Reservation);
+        }
     }
 
     private void UpdateDetails()
@@ -646,10 +611,12 @@ public class SeatMapForm : Form
             : new SpotSnapshot(SpotAvailability.Available, null);
 
         _lblSpotName.Text = spot.SpotOrRoom;
-        _lblType.Text = spot.IsDiscussionRoom ? "Type: Discussion Room" : "Type: Seat";
-        _lblTable.Text = spot.IsDiscussionRoom ? "Table: —" : $"Table: {spot.Table}";
+        _lblType.Text = $"Type: {spot.TypeLabel}";
+        _lblTable.Text = spot.Table == "—" ? "Table: —" : $"Table: {spot.Table}";
         _lblArea.Text = $"Area: {spot.Area}";
-        _lblSeat.Text = spot.IsDiscussionRoom ? "Seat number: —" : $"Seat number: {spot.SeatNumber}";
+        _lblSeat.Text = spot.SeatNumber > 0
+            ? $"Seat number: {spot.SeatNumber}"
+            : "Seat number: —";
         _lblSchedule.ForeColor = Color.DimGray;
 
         switch (snapshot.Availability)

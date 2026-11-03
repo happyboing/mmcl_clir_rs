@@ -3,7 +3,7 @@ using System.Drawing.Drawing2D;
 
 namespace MMCL_CLIRRS;
 
-// One clickable seat or discussion room on the interactive map.
+// One clickable seat or piece of furniture on the interactive map.
 // A reserved spot draws its own "Cancel" button directly below it.
 public sealed class SeatSpotControl : Control
 {
@@ -64,15 +64,43 @@ public sealed class SeatSpotControl : Control
         => Availability == SpotAvailability.Reserved && Reservation != null;
 
     private Rectangle ChairBounds
-        => new Rectangle((Width - 28) / 2, 0, 28, 24);
+    {
+        get
+        {
+            int width = Math.Min(40, Width - 10);
+            return new Rectangle((Width - width) / 2, 0, width, 24);
+        }
+    }
 
-    private Rectangle RoomBodyBounds
-        => new Rectangle(0, 0, Width - 1, Height - 25);
+    private Rectangle BeanBagBounds
+        => new Rectangle((Width - 32) / 2, 0, 32, 28);
+
+    private Rectangle FurnitureBodyBounds
+        => new Rectangle(0, 0, Width - 1, Height - 18);
+
+    private Rectangle BodyBounds => Spot.Kind switch
+    {
+        ClirSpotKind.Seat or ClirSpotKind.MonitorSeat => ChairBounds,
+        ClirSpotKind.BeanBag => BeanBagBounds,
+        ClirSpotKind.Couch or ClirSpotKind.Table => FurnitureBodyBounds,
+        ClirSpotKind.DiscussionRoom => FurnitureBodyBounds,
+        _ => ClientRectangle
+    };
 
     private Rectangle CancelBounds
-        => Spot.Kind == ClirSpotKind.Seat
-            ? new Rectangle((Width - 36) / 2, Height - 16, 36, 14)
-            : new Rectangle(4, Height - 17, Width - 8, 15);
+    {
+        get
+        {
+            int width = Spot.Kind switch
+            {
+                ClirSpotKind.Seat or ClirSpotKind.MonitorSeat => Math.Min(36, Width - 6),
+                ClirSpotKind.BeanBag => Math.Min(34, Width - 6),
+                _ => Width - 8
+            };
+
+            return new Rectangle((Width - width) / 2, Height - 16, width, 14);
+        }
+    }
 
     public void UpdateState(SpotSnapshot snapshot)
     {
@@ -93,10 +121,25 @@ public sealed class SeatSpotControl : Control
             _ => (AvailableFill, AvailableLine, AvailableText)
         };
 
-        if (Spot.Kind == ClirSpotKind.Seat)
-            DrawSeat(e.Graphics, fill, line, text);
-        else
-            DrawRoom(e.Graphics, fill, line, text);
+        switch (Spot.Kind)
+        {
+            case ClirSpotKind.Seat:
+            case ClirSpotKind.MonitorSeat:
+                DrawSeat(e.Graphics, fill, line, text);
+                break;
+            case ClirSpotKind.BeanBag:
+                DrawBeanBag(e.Graphics, fill, line, text);
+                break;
+            case ClirSpotKind.Couch:
+                DrawCouch(e.Graphics, fill, line, text);
+                break;
+            case ClirSpotKind.Table:
+                DrawTable(e.Graphics, fill, line, text);
+                break;
+            case ClirSpotKind.DiscussionRoom:
+                DrawRoom(e.Graphics, fill, line, text);
+                break;
+        }
 
         if (ShowCancel)
             DrawCancelButton(e.Graphics);
@@ -112,31 +155,106 @@ public sealed class SeatSpotControl : Control
     private void DrawSeat(Graphics g, Color fill, Color line, Color text)
     {
         Rectangle body = ChairBounds;
-        using GraphicsPath path = RoundedRect(body, 7);
+        using GraphicsPath path = RoundedRect(body, 6);
         using var fillBrush = new SolidBrush(fill);
         using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
 
         g.FillPath(fillBrush, path);
         g.DrawPath(linePen, path);
 
-        // A small backrest makes the shape read as a chair.
         using var backPen = new Pen(Color.FromArgb(120, line), 1.2f);
         g.DrawLine(backPen, body.Left + 6, body.Top + 5, body.Right - 6, body.Top + 5);
 
         using var numberFont = new Font("Segoe UI", 7f, FontStyle.Bold);
         using var textBrush = new SolidBrush(text);
-        var format = new StringFormat
+        using var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        g.DrawString(Spot.SeatNumber.ToString(), numberFont, textBrush,
+        g.DrawString(Spot.SeatNumber == 0 ? "•" : Spot.SeatNumber.ToString(),
+            numberFont, textBrush,
             new RectangleF(body.Left, body.Top + 4, body.Width, body.Height - 4), format);
+    }
+
+    private void DrawBeanBag(Graphics g, Color fill, Color line, Color text)
+    {
+        Rectangle body = BeanBagBounds;
+        using var fillBrush = new SolidBrush(fill);
+        using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
+
+        g.FillEllipse(fillBrush, body);
+        g.DrawEllipse(linePen, body);
+
+        using var font = new Font("Segoe UI", 5.5f, FontStyle.Bold);
+        using var textBrush = new SolidBrush(text);
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+        g.DrawString("bean bag", font, textBrush,
+            new RectangleF(body.X, body.Y, body.Width, body.Height), format);
+    }
+
+    private void DrawCouch(Graphics g, Color fill, Color line, Color text)
+    {
+        Rectangle body = FurnitureBodyBounds;
+        using GraphicsPath path = RoundedRect(body, 7);
+        using var fillBrush = new SolidBrush(fill);
+        using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
+        using var font = new Font("Segoe UI", 7f, FontStyle.Bold);
+        using var textBrush = new SolidBrush(text);
+
+        g.FillPath(fillBrush, path);
+        g.DrawPath(linePen, path);
+
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+
+        if (Height > Width * 2)
+        {
+            // Vertical couch: rotate the label.
+            GraphicsState state = g.Save();
+            g.TranslateTransform(Width / 2f, body.Height / 2f);
+            g.RotateTransform(-90);
+            g.DrawString("couch", font, textBrush,
+                new RectangleF(-body.Height / 2f, -12f, body.Height, 24f), format);
+            g.Restore(state);
+        }
+        else
+        {
+            g.DrawString("couch", font, textBrush,
+                new RectangleF(body.X, body.Y, body.Width, body.Height), format);
+        }
+    }
+
+    private void DrawTable(Graphics g, Color fill, Color line, Color text)
+    {
+        Rectangle body = FurnitureBodyBounds;
+        using GraphicsPath path = RoundedRect(body, 6);
+        using var fillBrush = new SolidBrush(fill);
+        using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
+        using var font = new Font("Segoe UI", 8f, FontStyle.Bold);
+        using var textBrush = new SolidBrush(text);
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+
+        g.FillPath(fillBrush, path);
+        g.DrawPath(linePen, path);
+        g.DrawString("table", font, textBrush,
+            new RectangleF(body.X, body.Y, body.Width, body.Height), format);
     }
 
     private void DrawRoom(Graphics g, Color fill, Color line, Color text)
     {
-        Rectangle body = RoomBodyBounds;
+        Rectangle body = FurnitureBodyBounds;
         using GraphicsPath path = RoundedRect(body, 8);
         using var fillBrush = new SolidBrush(fill);
         using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 3f : 2f);
@@ -147,30 +265,38 @@ public sealed class SeatSpotControl : Control
         string[] words = Spot.SpotOrRoom.Split(' ');
         string number = words[^1];
 
-        using var titleFont = new Font("Segoe UI", 6.5f, FontStyle.Bold);
-        using var numberFont = new Font("Segoe UI", 9f, FontStyle.Bold);
+        using var titleFont = new Font("Segoe UI", 7.5f, FontStyle.Bold);
+        using var numberFont = new Font("Segoe UI", 11f, FontStyle.Bold);
         using var textBrush = new SolidBrush(text);
-        var format = new StringFormat { Alignment = StringAlignment.Center };
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
 
+        float centerY = body.Top + body.Height / 2f;
         g.DrawString("DISCUSSION", titleFont, textBrush,
-            new RectangleF(body.Left, body.Top + 4, body.Width, 12), format);
+            new RectangleF(body.Left, centerY - 28, body.Width, 14), format);
         g.DrawString($"Room {number}", numberFont, textBrush,
-            new RectangleF(body.Left, body.Top + 16, body.Width, 18), format);
+            new RectangleF(body.Left, centerY - 8, body.Width, 22), format);
     }
 
     private void DrawCancelButton(Graphics g)
     {
         Rectangle bounds = CancelBounds;
-        using GraphicsPath path = RoundedRect(bounds, 6);
+        using GraphicsPath path = RoundedRect(bounds, 5);
         using var fillBrush = new SolidBrush(_hoverCancel
             ? Color.FromArgb(142, 0, 0)
             : Color.FromArgb(183, 28, 28));
 
         g.FillPath(fillBrush, path);
 
-        using var font = new Font("Segoe UI",
-            Spot.Kind == ClirSpotKind.Seat ? 7f : 8f, FontStyle.Bold);
-        var format = new StringFormat
+        float fontSize = bounds.Width < 30 ? 5.2f
+            : bounds.Width < 42 ? 6f
+            : 7.5f;
+
+        using var font = new Font("Segoe UI", fontSize, FontStyle.Bold);
+        using var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
@@ -181,10 +307,7 @@ public sealed class SeatSpotControl : Control
     protected override void OnMouseMove(MouseEventArgs e)
     {
         bool overCancel = ShowCancel && CancelBounds.Contains(e.Location);
-        bool overSpot = !overCancel &&
-                        (Spot.Kind == ClirSpotKind.Seat
-                            ? ChairBounds.Contains(e.Location)
-                            : RoomBodyBounds.Contains(e.Location));
+        bool overSpot = !overCancel && BodyBounds.Contains(e.Location);
 
         if (overCancel != _hoverCancel || overSpot != _hoverSpot)
         {
@@ -210,9 +333,7 @@ public sealed class SeatSpotControl : Control
     {
         if (ShowCancel && CancelBounds.Contains(e.Location))
             CancelClicked?.Invoke(this, EventArgs.Empty);
-        else if (Spot.Kind == ClirSpotKind.Seat
-                    ? ChairBounds.Contains(e.Location)
-                    : RoomBodyBounds.Contains(e.Location))
+        else if (BodyBounds.Contains(e.Location))
             SpotClicked?.Invoke(this, EventArgs.Empty);
 
         base.OnMouseClick(e);

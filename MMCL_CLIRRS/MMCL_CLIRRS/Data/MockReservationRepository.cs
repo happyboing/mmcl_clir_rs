@@ -15,7 +15,7 @@ public class MockReservationRepository : IReservationRepository
         string[] spots =
         {
             "Table 1 - Seat 1", "Table 1 - Seat 2", "Table 2 - Seat 1",
-            "Table 3 - Seat 4", "Discussion Room 1", "Discussion Room 2"
+            "Table 3 - Seat 4", "Discussion Room 1", "Couch 1"
         };
 
         for (int i = 0; i < 20; i++)
