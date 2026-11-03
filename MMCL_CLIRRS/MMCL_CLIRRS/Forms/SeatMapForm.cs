@@ -409,6 +409,12 @@ public class SeatMapForm : Form
         g.FillPath(floorBrush, floorPath);
         g.DrawPath(wallPen, floorPath);
 
+        // Leave the bottom edge open where the exit and entrance sit.
+        using var mapBackgroundBrush = new SolidBrush(_mapPanel.BackColor);
+        int openWidth = ClirMapLayout.MapWidth - 84;
+        g.FillRectangle(floorBrush, new Rectangle(42, 548, openWidth, 5));
+        g.FillRectangle(mapBackgroundBrush, new Rectangle(42, 552, openWidth, 6));
+
         using var faintFont = new Font("Segoe UI", 8f, FontStyle.Regular);
         using var tinyFont = new Font("Segoe UI", 6.4f, FontStyle.Bold);
         using var boldFont = new Font("Segoe UI", 8f, FontStyle.Bold);
@@ -470,9 +476,9 @@ public class SeatMapForm : Form
         // Short wall separating the reading area from the right-hand wing.
         g.DrawLine(dividerPen, 760, 140, 760, 520);
 
-        // Entrance and exit at the bottom.
-        DrawFurniture(g, new Rectangle(20, 520, 110, 28), "exit", 8.5f);
-        DrawFurniture(g, new Rectangle(740, 520, 140, 28), "entrance", 8.5f);
+        // Entrance and exit sit flush with the open bottom edge.
+        DrawFurniture(g, new Rectangle(24, 524, 110, 28), "exit", 8.5f);
+        DrawFurniture(g, new Rectangle(724, 524, 150, 28), "entrance", 8.5f);
     }
 
     private static void DrawMonitorTable(Graphics g)
