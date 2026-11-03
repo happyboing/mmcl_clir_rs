@@ -2,14 +2,12 @@
 
 public class UpdateReservationDialog : Form
 {
-    private readonly TextBox _txtSpot = new TextBox();
-    private readonly CheckBox _chkRoom = new CheckBox();
+    private readonly ComboBox _cmbSpot = new ComboBox();
     private readonly DateTimePicker _dtpDate = new DateTimePicker();
     private readonly DateTimePicker _dtpStart = new DateTimePicker();
     private readonly DateTimePicker _dtpEnd = new DateTimePicker();
 
-    public string SpotOrRoom => _txtSpot.Text.Trim();
-    public bool IsDiscussionRoom => _chkRoom.Checked;
+    public string SpotOrRoom => _cmbSpot.SelectedItem?.ToString() ?? "";
     public DateTime Date => _dtpDate.Value.Date;
     public TimeSpan StartTime => _dtpStart.Value.TimeOfDay;
     public TimeSpan EndTime => _dtpEnd.Value.TimeOfDay;
@@ -23,22 +21,23 @@ public class UpdateReservationDialog : Form
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(380, 290);
+        ClientSize = new Size(380, 250);
 
-        _txtSpot.Text = reservation.SpotOrRoom;
-        _chkRoom.Text = "Discussion room";
-        _chkRoom.Checked = reservation.IsDiscussionRoom;
+        // Only seats and rooms that exist in the CLIR layout can be chosen.
+        _cmbSpot.DropDownStyle = ComboBoxStyle.DropDownList;
+        _cmbSpot.Items.AddRange(ClirLayout.GetSeats().ToArray());
+        _cmbSpot.Items.AddRange(ClirLayout.GetDiscussionRooms().ToArray());
+        _cmbSpot.SelectedItem = reservation.SpotOrRoom;
 
         _dtpDate.Format = DateTimePickerFormat.Short;
         _dtpDate.Value = reservation.Date;
         ConfigureTimePicker(_dtpStart, reservation.StartTime);
         ConfigureTimePicker(_dtpEnd, reservation.EndTime);
 
-        AddRow("Spot / Room:", _txtSpot, 20);
-        AddRow("", _chkRoom, 60);
-        AddRow("Date:", _dtpDate, 100);
-        AddRow("Start time:", _dtpStart, 140);
-        AddRow("End time:", _dtpEnd, 180);
+        AddRow("Spot / Room:", _cmbSpot, 20);
+        AddRow("Date:", _dtpDate, 60);
+        AddRow("Start time:", _dtpStart, 100);
+        AddRow("End time:", _dtpEnd, 140);
 
         Button btnSave = CreateButton("Save", Color.FromArgb(183, 28, 28), Color.White, 140);
         Button btnCancel = CreateButton("Cancel", Color.White, Color.FromArgb(183, 28, 28), 250);
@@ -61,9 +60,7 @@ public class UpdateReservationDialog : Form
 
     private void AddRow(string label, Control control, int y)
     {
-        if (label.Length > 0)
-            Controls.Add(new Label { Text = label, Location = new Point(20, y + 3), AutoSize = true });
-
+        Controls.Add(new Label { Text = label, Location = new Point(20, y + 3), AutoSize = true });
         control.Location = new Point(140, y);
         control.Width = 210;
         Controls.Add(control);
@@ -74,7 +71,7 @@ public class UpdateReservationDialog : Form
         var button = new Button
         {
             Text = text,
-            Location = new Point(x, 235),
+            Location = new Point(x, 195),
             Size = new Size(100, 36),
             BackColor = back,
             ForeColor = fore,
@@ -90,7 +87,7 @@ public class UpdateReservationDialog : Form
     {
         if (SpotOrRoom.Length == 0)
         {
-            MessageBox.Show("Please enter a spot or room.");
+            MessageBox.Show("Please choose a seat or room.");
             return false;
         }
         if (EndTime <= StartTime)

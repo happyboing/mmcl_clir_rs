@@ -3,7 +3,8 @@
 public static class PromptDialog
 {
     // Returns the typed text, or null if the user cancelled.
-    public static string? Show(IWin32Window owner, string title, string message)
+    public static string? Show(IWin32Window owner, string title, string message,
+                               bool maskInput = false, string okText = "Verify")
     {
         using var form = new Form
         {
@@ -18,11 +19,16 @@ public static class PromptDialog
         };
 
         var label = new Label { Text = message, Location = new Point(20, 20), Size = new Size(340, 45) };
-        var box = new TextBox { Location = new Point(20, 75), Width = 340 };
+        var box = new TextBox
+        {
+            Location = new Point(20, 75),
+            Width = 340,
+            UseSystemPasswordChar = maskInput
+        };
 
         var ok = new Button
         {
-            Text = "Verify",
+            Text = okText,
             DialogResult = DialogResult.OK,
             Location = new Point(170, 115),
             Size = new Size(90, 36),

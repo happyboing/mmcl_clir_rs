@@ -121,29 +121,37 @@ public class ReservationSearchService
     }
 
     // ---------- Update ----------
-    public OperationResult Update(int reservationId, string spotOrRoom, bool isDiscussionRoom,
+    public OperationResult Update(int reservationId, string spotOrRoom,
                                   DateTime date, TimeSpan startTime, TimeSpan endTime)
     {
         Reservation? r = FindById(reservationId);
         if (r == null) return new OperationResult(false, "Reservation not found.");
         if (r.Status != ReservationStatus.Active)
             return new OperationResult(false, "Only active reservations can be updated.");
-        if (string.IsNullOrWhiteSpace(spotOrRoom))
-            return new OperationResult(false, "Spot or room is required.");
+
+        string spot = spotOrRoom.Trim();
+        if (!ClirLayout.Exists(spot))
+            return new OperationResult(false, "Please choose a seat or room that exists in the CLIR layout.");
         if (endTime <= startTime)
             return new OperationResult(false, "End time must be after the start time.");
 
-        Reservation? conflict = FindConflict(r, spotOrRoom.Trim(), date.Date, startTime, endTime);
+        // Staff may move a reservation to any date or time from now on, but never into the past.
+        string? pastProblem = CheckNotInThePast(r, date.Date, startTime, endTime);
+        if (pastProblem != null) return new OperationResult(false, pastProblem);
+
+        Reservation? conflict = FindConflict(r, spot, date.Date, startTime, endTime);
         if (conflict != null)
             return new OperationResult(false,
                 $"That slot overlaps reservation #{conflict.ReservationId} ({conflict.UserName}, " +
                 $"{Clock(conflict.StartTime)}-{Clock(conflict.EndTime)}) for the same spot.");
 
+        bool isDiscussionRoom = ClirLayout.GetDiscussionRooms().Contains(spot);
+
         string before = Describe(r);
         var undo = new RescheduleOperation(r,
             $"Updated reservation #{r.ReservationId} ({r.UserName})");   // captures the old values
 
-        ApplyChange(r, x => x.Reschedule(spotOrRoom, isDiscussionRoom, date, startTime, endTime));
+        ApplyChange(r, x => x.Reschedule(spot, isDiscussionRoom, date, startTime, endTime));
         Log(OperationType.Update, r, $"{before}  ->  {Describe(r)}");
         _undoStack.Push(undo);
         return new OperationResult(true, "Reservation updated.");
@@ -230,7 +238,27 @@ public class ReservationSearchService
         }
         return null;
     }
+    // Returns null when the new slot is fine, otherwise the reason it is not.
+    private static string? CheckNotInThePast(Reservation r, DateTime date, TimeSpan start, TimeSpan end)
+    {
+        DateTime now = DateTime.Now;
 
+        if (date < now.Date)
+            return "That date has already passed.";
+
+        if (date == now.Date)
+        {
+            if (end <= now.TimeOfDay)
+                return "That end time has already passed.";
+
+            // A reservation already under way may keep its original start
+            // (for example, staff extending the end time). Moving the start into the past is not allowed.
+            bool startMoved = date != r.Date.Date || start != r.StartTime;
+            if (startMoved && start < now.TimeOfDay)
+                return "That start time has already passed. Please choose a later time.";
+        }
+        return null;
+    }
     private void Log(OperationType operation, Reservation r, string details)
         => _activityLog.Push(new ActivityLogEntry(DateTime.Now, operation, r.ReservationId, r.UserName, details));
 

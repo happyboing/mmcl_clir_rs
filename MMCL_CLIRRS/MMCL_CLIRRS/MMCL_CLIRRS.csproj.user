@@ -4,6 +4,15 @@
     <Compile Update="Forms\ActivityLogForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\CancelReservationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MainMenuForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\MakeReservationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Forms\ReservationSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>

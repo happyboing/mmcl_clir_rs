@@ -160,7 +160,7 @@ public partial class ReservationSearchForm : Form
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
 
         OperationResult result = _service.Update(selected.ReservationId, dialog.SpotOrRoom,
-            dialog.IsDiscussionRoom, dialog.Date, dialog.StartTime, dialog.EndTime);
+            dialog.Date, dialog.StartTime, dialog.EndTime);
 
         MessageBox.Show(result.Message, result.Success ? "Updated" : "Update failed",
             MessageBoxButtons.OK, result.Success ? MessageBoxIcon.Information : MessageBoxIcon.Warning);

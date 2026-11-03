@@ -9,6 +9,9 @@ public class MainMenuForm : Form
     private readonly ReservationManagementService _management;
     private readonly ReservationSearchService _search;
 
+    // CHANGE THIS PIN before the demo.
+    private readonly StaffAccessControl _staffAccess = new StaffAccessControl("2468");
+
     public MainMenuForm(ReservationManagementService management, ReservationSearchService search)
     {
         _management = management;
@@ -39,11 +42,38 @@ public class MainMenuForm : Form
 
         btnReserve.Click += (s, e) => { using var f = new MakeReservationForm(_management); f.ShowDialog(this); };
         btnCancel.Click += (s, e) => { using var f = new CancelReservationForm(_management); f.ShowDialog(this); };
-        btnStaff.Click += (s, e) => { using var f = new ReservationSearchForm(_search); f.ShowDialog(this); };
+        btnStaff.Click += (s, e) => OpenStaffScreen();
 
         Controls.Add(btnReserve);
         Controls.Add(btnCancel);
         Controls.Add(btnStaff);
+    }
+
+    // Students never see the staff screen: it opens only after the correct PIN.
+    private void OpenStaffScreen()
+    {
+        if (_staffAccess.IsLockedOut(out int secondsLeft))
+        {
+            MessageBox.Show($"Too many wrong attempts. Please try again in {secondsLeft} seconds.", "Locked");
+            return;
+        }
+
+        string? pin = PromptDialog.Show(this, "Staff Access", "Enter the staff PIN:",
+                                        maskInput: true, okText: "Enter");
+        if (pin == null) return;   // cancelled
+
+        if (!_staffAccess.TryUnlock(pin))
+        {
+            MessageBox.Show(
+                _staffAccess.IsLockedOut(out int wait)
+                    ? $"Too many wrong attempts. Locked for {wait} seconds."
+                    : "Incorrect PIN.",
+                "Access denied");
+            return;
+        }
+
+        using var form = new ReservationSearchForm(_search);
+        form.ShowDialog(this);
     }
 
     private static Button MakeMenuButton(string text, int y)
