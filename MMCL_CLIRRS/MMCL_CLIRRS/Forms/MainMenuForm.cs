@@ -8,6 +8,7 @@ public class MainMenuForm : Form
 
     private readonly ReservationManagementService _management;
     private readonly ReservationSearchService _search;
+    private readonly System.Windows.Forms.Timer _scheduleMonitor = new();
 
     // CHANGE THIS PIN before the demo.
     private readonly StaffAccessControl _staffAccess = new StaffAccessControl("2468");
@@ -16,6 +17,18 @@ public class MainMenuForm : Form
     {
         _management = management;
         _search = search;
+
+        // Run the five-minute no-show monitor for as long as the application
+        // is open, including while a modal reservation/search form is shown.
+        _management.ProcessDueReservations();
+        _scheduleMonitor.Interval = 5000;
+        _scheduleMonitor.Tick += (s, e) => _management.ProcessDueReservations();
+        _scheduleMonitor.Start();
+        FormClosed += (s, e) =>
+        {
+            _scheduleMonitor.Stop();
+            _scheduleMonitor.Dispose();
+        };
 
         Text = "MMCL CLIRRS";
         Font = new Font("Segoe UI", 10);
@@ -72,7 +85,7 @@ public class MainMenuForm : Form
             return;
         }
 
-        using var form = new ReservationSearchForm(_search);
+        using var form = new ReservationSearchForm(_management, _search);
         form.ShowDialog(this);
     }
 

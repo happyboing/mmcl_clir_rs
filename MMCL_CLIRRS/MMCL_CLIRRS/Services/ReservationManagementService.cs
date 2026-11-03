@@ -1,22 +1,33 @@
 namespace MMCL_CLIRRS;
 
 // ============================================================
-//  Functionality #1: Seat and Room Reservation Management
-//  This class holds the BRAINS (the rules). The forms only show
-//  buttons and text boxes and call the methods below.
+// Functionality #1: Seat and Room Reservation Management
+// Functionality #2: Reservation Scheduling and Availability
+//
+// The service owns the scheduling rules. Forms only collect input
+// and display the current state returned by this class.
 // ============================================================
 public class ReservationManagementService
 {
-    private readonly ReservationLinkedList _reservations;                    // LINKED LIST: master storage
-    private readonly ReservationSearchService _search;                       // Functionality #4: keeps the search indexes
-    private readonly LinkedQueue<ReservationRequest> _requestQueue = new();  // QUEUE: first-come, first-served
+    private static readonly TimeSpan NoShowGracePeriod = TimeSpan.FromMinutes(5);
+
+    private readonly ReservationLinkedList _reservations;
+    private readonly ReservationSearchService _search;
+    private readonly LinkedQueue<ReservationRequest> _requestQueue = new();
+    private readonly object _schedulingGate = new();
+    private readonly List<ReservationExpirationNotice> _pendingExpirationNotices = new();
     private int _nextId;
+
+    // Raised after a reservation is automatically expired. The main menu
+    // drives ProcessDueReservations on the WinForms UI thread, so subscribers
+    // can safely update their forms and display a staff notification.
+    public event Action<ReservationExpirationNotice>? ReservationExpired;
 
     public ReservationManagementService(ReservationLinkedList reservations,
                                         ReservationSearchService search)
     {
-        _reservations = reservations;
-        _search = search;
+        _reservations = reservations ?? throw new ArgumentNullException(nameof(reservations));
+        _search = search ?? throw new ArgumentNullException(nameof(search));
 
         // New reservation IDs continue after the biggest existing ID.
         _nextId = _reservations.GetAll()
@@ -26,34 +37,42 @@ public class ReservationManagementService
     }
 
     // =========================================================
-    //  MAKING A RESERVATION
+    // MAKING A RESERVATION - Queue / First-Come, First-Served
     // =========================================================
 
-    // Step 1: check the rules.  Step 2: join the queue.  Step 3: the queue is served in order.
     public OperationResult SubmitRequest(ReservationRequest request)
     {
-        string? problem = Validate(request);
-        if (problem != null)
-            return new OperationResult(false, problem);
+        if (request == null)
+            return new OperationResult(false, "A reservation request is required.");
 
-        _requestQueue.Enqueue(request);
+        // Release any no-show reservations before checking availability.
+        ProcessDueReservations();
 
-        // Serve everyone in line, front first. (With one kiosk the line is usually just 1 person,
-        // but if requests ever arrive together, the one submitted first is always served first.)
-        OperationResult result = new OperationResult(false, "Nothing was processed.");
-        while (!_requestQueue.IsEmpty)
-            result = ProcessNextRequest();
+        lock (_schedulingGate)
+        {
+            string? problem = Validate(request, DateTime.Now);
+            if (problem != null)
+                return new OperationResult(false, problem);
 
-        return result;
+            // The scheduling lock makes enqueue + processing atomic. If two
+            // callers submit at almost the same time, the request that enters
+            // this queue first is processed first and gets the slot first.
+            _requestQueue.Enqueue(request);
+
+            OperationResult result = new OperationResult(false, "Nothing was processed.");
+            while (!_requestQueue.IsEmpty)
+                result = ProcessNextRequest();
+
+            return result;
+        }
     }
 
-    // Take the FRONT request out of the queue and try to turn it into a real reservation.
     private OperationResult ProcessNextRequest()
     {
         ReservationRequest request = _requestQueue.Dequeue();
 
-        // Check again at the moment it is this request's turn:
-        // someone ahead in line may have just taken the same spot.
+        // Re-check at processing time. The availability shown in a form may
+        // have changed since the user first selected the seat or room.
         Reservation? conflict = FindConflict(request.SpotOrRoom, request.Date,
                                              request.StartTime, request.EndTime);
         if (conflict != null)
@@ -64,13 +83,13 @@ public class ReservationManagementService
         }
 
         var reservation = new Reservation(
-            _nextId++, request.UserName, request.UserIdNumber, request.UserType,
-            request.Department, request.Program, request.YearLevel,
-            request.SpotOrRoom, request.IsDiscussionRoom,
-            request.Date, request.StartTime, request.EndTime);
+            _nextId++, request.UserName.Trim(), request.UserIdNumber.Trim(), request.UserType,
+            request.Department.Trim(), request.Program.Trim(), request.YearLevel,
+            request.SpotOrRoom.Trim(), request.IsDiscussionRoom,
+            request.Date.Date, request.StartTime, request.EndTime);
 
-        _reservations.Add(reservation);   // store it in the linked list
-        _search.Index(reservation);       // tell the search system (#4) about it
+        _reservations.Add(reservation);
+        _search.Index(reservation);
 
         return new OperationResult(true,
             $"Reservation #{reservation.ReservationId} confirmed!\n\n" +
@@ -78,105 +97,211 @@ public class ReservationManagementService
             $"{reservation.Date:ddd, dd MMM yyyy}, {Clock(reservation.StartTime)} - {Clock(reservation.EndTime)}");
     }
 
-    // Returns null when everything is fine, otherwise the reason it is NOT fine.
-    private string? Validate(ReservationRequest r)
+    private static string? Validate(ReservationRequest r, DateTime now)
     {
-        if (r.UserName.Length == 0) return "Please enter your name.";
-        if (r.UserIdNumber.Length == 0) return "Please enter your student / faculty ID number.";
-        if (r.Department.Length == 0) return "Please enter your department.";
-        if (r.Program.Length == 0) return "Please enter your program.";
+        if (string.IsNullOrWhiteSpace(r.UserName)) return "Please enter your name.";
+        if (string.IsNullOrWhiteSpace(r.UserIdNumber)) return "Please enter your student / faculty ID number.";
+        if (string.IsNullOrWhiteSpace(r.Department)) return "Please enter your department.";
+        if (string.IsNullOrWhiteSpace(r.Program)) return "Please enter your program.";
+        if (!Enum.IsDefined(typeof(UserType), r.UserType)) return "Please choose a valid user type.";
+
         if (r.UserType == UserType.Student && (r.YearLevel < 1 || r.YearLevel > 6))
             return "Please enter a valid year level.";
 
-        if (r.SpotOrRoom.Length == 0 || !ClirLayout.Exists(r.SpotOrRoom))
+        string spot = r.SpotOrRoom?.Trim() ?? string.Empty;
+        if (spot.Length == 0 || !ClirLayout.Exists(spot))
             return "Please choose a seat or room from the list.";
+
+        bool isDiscussionRoom = ClirLayout.GetDiscussionRooms().Contains(spot);
+        if (r.IsDiscussionRoom != isDiscussionRoom)
+            return "The selected location does not match the chosen seat / discussion-room category.";
+
+        if (r.StartTime < TimeSpan.Zero || r.StartTime >= TimeSpan.FromDays(1) ||
+            r.EndTime <= TimeSpan.Zero || r.EndTime >= TimeSpan.FromDays(1))
+            return "Please choose valid reservation times within the same day.";
         if (r.EndTime <= r.StartTime)
             return "The end time must be after the start time.";
 
-        // Rule from the proposal: students = today only, faculty = today or upcoming dates.
-        DateTime today = DateTime.Today;
+        DateTime today = now.Date;
         if (r.UserType == UserType.Student && r.Date.Date != today)
             return "Students can only reserve for today.";
         if (r.Date.Date < today)
             return "You cannot reserve a date that has already passed.";
 
-        if (r.Date.Date == today && r.StartTime < DateTime.Now.TimeOfDay)
+        if (r.Date.Date == today && r.StartTime < now.TimeOfDay)
             return "That start time has already passed. Please choose a later time.";
 
         return null;
     }
 
     // =========================================================
-    //  AVAILABILITY  (prevents double booking)
+    // AVAILABILITY
     // =========================================================
 
+    // This is always calculated from the current reservation index. No
+    // availability result is cached, so a newly booked or released slot is
+    // reflected on the next query.
     public bool IsAvailable(string spotOrRoom, DateTime date, TimeSpan start, TimeSpan end)
-        => FindConflict(spotOrRoom, date, start, end) == null;
-
-    // Every reservation for this spot on this date that is still holding it, earliest first.
-    public List<Reservation> GetBookedSlots(string spotOrRoom, DateTime date)
     {
-        var booked = new List<Reservation>();
-        foreach (Reservation r in _search.SearchBySpot(spotOrRoom))
-        {
-            if (IsHoldingSpot(r) && r.Date.Date == date.Date)
-                booked.Add(r);
-        }
-        return MergeSorter.Sort(booked, new ReservationDateTimeComparer());   // Merge Sort by time
+        if (string.IsNullOrWhiteSpace(spotOrRoom) || !ClirLayout.Exists(spotOrRoom.Trim()) ||
+            start < TimeSpan.Zero || end <= start || end >= TimeSpan.FromDays(1))
+            return false;
+
+        lock (_schedulingGate)
+            return FindConflict(spotOrRoom.Trim(), date.Date, start, end) == null;
     }
 
-    // Two time ranges overlap when each one starts before the other one ends.
-    private Reservation? FindConflict(string spotOrRoom, DateTime date, TimeSpan start, TimeSpan end)
+    // Reservations that are still holding a location for the selected date,
+    // returned chronologically using the project's Merge Sort implementation.
+    public List<Reservation> GetBookedSlots(string spotOrRoom, DateTime date)
+    {
+        if (string.IsNullOrWhiteSpace(spotOrRoom))
+            return new List<Reservation>();
+
+        lock (_schedulingGate)
+        {
+            var booked = new List<Reservation>();
+            foreach (Reservation r in _search.SearchBySpot(spotOrRoom.Trim()))
+            {
+                if (IsHoldingSpot(r) && r.Date.Date == date.Date)
+                    booked.Add(r);
+            }
+
+            return MergeSorter.Sort(booked, new ReservationDateTimeComparer());
+        }
+    }
+
+    private Reservation? FindConflict(string spotOrRoom, DateTime date,
+                                      TimeSpan start, TimeSpan end)
     {
         foreach (Reservation other in GetBookedSlots(spotOrRoom, date))
         {
+            // Adjacent reservations are allowed: [09:00, 10:00) and
+            // [10:00, 11:00) do not overlap.
             if (start < other.EndTime && other.StartTime < end)
                 return other;
         }
         return null;
     }
 
-    // Cancelled / Expired / Completed reservations free the spot. Active and Occupied do not.
+    // Active reservations are held until cancelled or expired. Verified
+    // occupants continue holding the location until their end time.
     private static bool IsHoldingSpot(Reservation r)
         => r.Status == ReservationStatus.Active || r.Status == ReservationStatus.Occupied;
 
     // =========================================================
-    //  CANCELLING (by student number)
+    // AUTOMATIC SCHEDULING / FIVE-MINUTE NO-SHOW MONITOR
     // =========================================================
 
-    // The active reservations that belong to this ID number.
-    public List<Reservation> GetActiveReservationsOf(string idNumber)
+    // Call this periodically while the application is running. Active
+    // reservations expire at scheduled start + five minutes if they were not
+    // verified as Occupied. Occupied reservations complete at their end time.
+    // The optional time parameter also makes the scheduling rules testable.
+    public List<ReservationExpirationNotice> ProcessDueReservations(DateTime? currentTime = null)
     {
-        var mine = new List<Reservation>();
-        foreach (Reservation r in _search.SearchByUserId(idNumber.Trim()))
+        DateTime now = currentTime ?? DateTime.Now;
+        var newlyExpired = new List<ReservationExpirationNotice>();
+
+        lock (_schedulingGate)
         {
-            if (r.Status == ReservationStatus.Active)
-                mine.Add(r);
+            // Snapshot the linked list because each status change updates the
+            // search indexes while this pass is running.
+            foreach (Reservation reservation in _reservations.GetAll().ToList())
+            {
+                if (reservation.Status == ReservationStatus.Active)
+                {
+                    DateTime scheduledStart = reservation.Date.Date.Add(reservation.StartTime);
+                    DateTime graceDeadline = scheduledStart.Add(NoShowGracePeriod);
+
+                    if (now >= graceDeadline && _search.MarkExpired(reservation.ReservationId))
+                    {
+                        var notice = new ReservationExpirationNotice(
+                            reservation.ReservationId,
+                            reservation.UserName,
+                            reservation.SpotOrRoom,
+                            scheduledStart,
+                            now);
+
+                        newlyExpired.Add(notice);
+                        _pendingExpirationNotices.Add(notice);
+                    }
+                }
+                else if (reservation.Status == ReservationStatus.Occupied)
+                {
+                    DateTime scheduledEnd = reservation.Date.Date.Add(reservation.EndTime);
+                    if (now >= scheduledEnd)
+                        _search.MarkCompleted(reservation.ReservationId);
+                }
+            }
         }
-        return MergeSorter.Sort(mine, new ReservationDateTimeComparer());
+
+        // Notify outside the lock so form handlers can safely query the service.
+        foreach (ReservationExpirationNotice notice in newlyExpired)
+            ReservationExpired?.Invoke(notice);
+
+        return newlyExpired;
     }
 
-    // Verify that the entered number really belongs to this reservation, then cancel it.
+    // Pending notices remain available if no staff screen was open at the
+    // moment a no-show reservation expired. Opening the staff screen consumes
+    // them, while live event handlers acknowledge their own notice.
+    public List<ReservationExpirationNotice> GetPendingExpirationNotifications()
+    {
+        lock (_schedulingGate)
+        {
+            var pending = new List<ReservationExpirationNotice>(_pendingExpirationNotices);
+            _pendingExpirationNotices.Clear();
+            return pending;
+        }
+    }
+
+    public void AcknowledgeExpirationNotification(int reservationId)
+    {
+        lock (_schedulingGate)
+            _pendingExpirationNotices.RemoveAll(n => n.ReservationId == reservationId);
+    }
+
+    // =========================================================
+    // CANCELLING (by student / faculty ID number)
+    // =========================================================
+
+    public List<Reservation> GetActiveReservationsOf(string idNumber)
+    {
+        lock (_schedulingGate)
+        {
+            var mine = new List<Reservation>();
+            foreach (Reservation r in _search.SearchByUserId(idNumber.Trim()))
+            {
+                if (r.Status == ReservationStatus.Active)
+                    mine.Add(r);
+            }
+            return MergeSorter.Sort(mine, new ReservationDateTimeComparer());
+        }
+    }
+
     public OperationResult CancelReservation(int reservationId, string enteredIdNumber)
     {
-        Reservation? r = _search.FindById(reservationId);
-        if (r == null)
-            return new OperationResult(false, "Reservation not found.");
+        ProcessDueReservations();
 
-        if (!r.MatchesUser(enteredIdNumber))
-            return new OperationResult(false,
-                "That ID number does not match the person who made this reservation.");
+        lock (_schedulingGate)
+        {
+            Reservation? r = _search.FindById(reservationId);
+            if (r == null)
+                return new OperationResult(false, "Reservation not found.");
 
-        if (r.Status != ReservationStatus.Active)
-            return new OperationResult(false, "Only active reservations can be cancelled.");
+            if (!r.MatchesUser(enteredIdNumber ?? string.Empty))
+                return new OperationResult(false,
+                    "That ID number does not match the person who made this reservation.");
 
-        // Functionality #4 changes the status to Cancelled and writes it in the activity log.
-        // Because Cancelled no longer "holds" the spot, it is automatically available again.
-        if (!_search.Cancel(reservationId))
-            return new OperationResult(false, "The reservation could not be cancelled.");
+            if (r.Status != ReservationStatus.Active)
+                return new OperationResult(false, "Only active reservations can be cancelled.");
 
-        return new OperationResult(true,
-            $"Reservation #{reservationId} was cancelled. {r.SpotOrRoom} is available again.");
+            if (!_search.Cancel(reservationId))
+                return new OperationResult(false, "The reservation could not be cancelled.");
+
+            return new OperationResult(true,
+                $"Reservation #{reservationId} was cancelled. {r.SpotOrRoom} is available again.");
+        }
     }
 
     private static string Clock(TimeSpan t) => t.ToString(@"hh\:mm");

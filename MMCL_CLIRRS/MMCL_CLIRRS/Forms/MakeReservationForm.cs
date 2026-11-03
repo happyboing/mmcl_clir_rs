@@ -1,35 +1,37 @@
 namespace MMCL_CLIRRS;
 
-// Screen for reserving a seat or discussion room (Functionality #1).
-// Built in code (no designer) so every control is visible and easy to follow.
+// Reservation entry screen. The list of locations is refreshed periodically
+// so a spot reserved by another user disappears from this user's choices.
 public class MakeReservationForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
 
     private readonly ReservationManagementService _service;
+    private readonly System.Windows.Forms.Timer _availabilityTimer = new();
+    private readonly List<string> _allSpots = new();
+    private bool _updatingSpotOptions;
+    private Button? _btnReserve;
 
-    // ----- the controls (text boxes, drop-downs, buttons...) -----
-    private readonly TextBox _txtName = new TextBox();
-    private readonly TextBox _txtIdNumber = new TextBox();
-    private readonly ComboBox _cmbUserType = new ComboBox();
-    private readonly ComboBox _cmbDepartment = new ComboBox();
-    private readonly TextBox _txtProgram = new TextBox();
-    private readonly NumericUpDown _numYear = new NumericUpDown();
+    private readonly TextBox _txtName = new();
+    private readonly TextBox _txtIdNumber = new();
+    private readonly ComboBox _cmbUserType = new();
+    private readonly ComboBox _cmbDepartment = new();
+    private readonly TextBox _txtProgram = new();
+    private readonly NumericUpDown _numYear = new();
 
-    private readonly ComboBox _cmbSpotType = new ComboBox();
-    private readonly ComboBox _cmbSpot = new ComboBox();
-    private readonly DateTimePicker _dtpDate = new DateTimePicker();
-    private readonly DateTimePicker _dtpStart = new DateTimePicker();
-    private readonly DateTimePicker _dtpEnd = new DateTimePicker();
+    private readonly ComboBox _cmbSpotType = new();
+    private readonly ComboBox _cmbSpot = new();
+    private readonly DateTimePicker _dtpDate = new();
+    private readonly DateTimePicker _dtpStart = new();
+    private readonly DateTimePicker _dtpEnd = new();
 
-    private readonly Label _lblAvailability = new Label();
-    private readonly ListBox _lstBooked = new ListBox();
+    private readonly Label _lblAvailability = new();
+    private readonly ListBox _lstBooked = new();
 
     public MakeReservationForm(ReservationManagementService service)
     {
-        _service = service;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
 
-        // ----- the window itself -----
         Text = "Reserve a Seat or Room";
         Font = new Font("Segoe UI", 10);
         BackColor = Color.White;
@@ -39,7 +41,6 @@ public class MakeReservationForm : Form
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(450, 720);
 
-        // ----- red title bar -----
         Controls.Add(new Label
         {
             Text = "Reserve a Seat or Room",
@@ -52,7 +53,7 @@ public class MakeReservationForm : Form
             Padding = new Padding(12, 0, 0, 0)
         });
 
-        // ----- section 1: who is reserving -----
+        // User information.
         AddSectionTitle("Your details", 62);
         AddRow("Full name:", _txtName, 92);
         AddRow("ID number:", _txtIdNumber, 130);
@@ -62,7 +63,6 @@ public class MakeReservationForm : Form
         _cmbUserType.SelectedIndex = 0;
         AddRow("I am a:", _cmbUserType, 168);
 
-        // DropDown (not DropDownList) = they can pick one OR type their own.
         _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDown;
         _cmbDepartment.Items.AddRange(new object[]
         {
@@ -79,7 +79,7 @@ public class MakeReservationForm : Form
         _numYear.Maximum = 6;
         AddRow("Year level:", _numYear, 282);
 
-        // ----- section 2: what they want to reserve -----
+        // Reservation preferences.
         AddSectionTitle("Reservation   (students: today only | faculty: today or later)", 326);
 
         _cmbSpotType.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -88,20 +88,25 @@ public class MakeReservationForm : Form
         AddRow("Reserve a:", _cmbSpotType, 356);
 
         _cmbSpot.DropDownStyle = ComboBoxStyle.DropDownList;
-        AddRow("Spot / Room:", _cmbSpot, 394);
+        AddRow("Available spot:", _cmbSpot, 394);
 
         _dtpDate.Format = DateTimePickerFormat.Short;
-        _dtpDate.MinDate = DateTime.Today;      // cannot pick the past
+        _dtpDate.MinDate = DateTime.Today;
         _dtpDate.Value = DateTime.Today;
         AddRow("Date:", _dtpDate, 432);
 
-        int nextHour = Math.Min(DateTime.Now.Hour + 1, 22);
-        SetupTimePicker(_dtpStart, DateTime.Today.AddHours(nextHour));
-        SetupTimePicker(_dtpEnd, DateTime.Today.AddHours(nextHour + 1));
+        DateTime defaultStart = GetDefaultStartTime();
+        DateTime defaultEnd = defaultStart.AddHours(1);
+        if (defaultEnd.Date != DateTime.Today)
+            defaultEnd = DateTime.Today.AddHours(23).AddMinutes(59);
+
+        SetupTimePicker(_dtpStart, defaultStart);
+        SetupTimePicker(_dtpEnd, defaultEnd);
         AddRow("Start time:", _dtpStart, 470);
         AddRow("End time:", _dtpEnd, 508);
 
-        // ----- live availability message + list of already-booked times -----
+        // Live availability indicator and the other reservations for the
+        // selected location on the chosen date.
         _lblAvailability.Location = new Point(20, 552);
         _lblAvailability.Size = new Size(410, 26);
         _lblAvailability.Font = new Font("Segoe UI", 10, FontStyle.Bold);
@@ -118,9 +123,9 @@ public class MakeReservationForm : Form
         _lstBooked.Size = new Size(410, 52);
         Controls.Add(_lstBooked);
 
-        // ----- buttons -----
         Button btnReserve = MakeButton("Reserve", Maroon, Color.White, 200);
         Button btnClose = MakeButton("Close", Color.White, Maroon, 320);
+        _btnReserve = btnReserve;
         btnReserve.Click += btnReserve_Click;
         btnClose.Click += (s, e) => Close();
         AcceptButton = btnReserve;
@@ -128,87 +133,185 @@ public class MakeReservationForm : Form
         Controls.Add(btnReserve);
         Controls.Add(btnClose);
 
-        // ----- fill the spot list, then start listening for changes -----
         FillSpotList();
         ApplyUserTypeRules();
 
         _cmbUserType.SelectedIndexChanged += (s, e) => ApplyUserTypeRules();
         _cmbSpotType.SelectedIndexChanged += (s, e) => FillSpotList();
-        _cmbSpot.SelectedIndexChanged += (s, e) => RefreshAvailability();
-        _dtpDate.ValueChanged += (s, e) => RefreshAvailability();
-        _dtpStart.ValueChanged += (s, e) => RefreshAvailability();
-        _dtpEnd.ValueChanged += (s, e) => RefreshAvailability();
+        _cmbSpot.SelectedIndexChanged += (s, e) =>
+        {
+            if (!_updatingSpotOptions)
+                RefreshAvailability();
+        };
+        _dtpDate.ValueChanged += (s, e) => RefreshAvailableSpotOptions();
+        _dtpStart.ValueChanged += (s, e) => RefreshAvailableSpotOptions();
+        _dtpEnd.ValueChanged += (s, e) => RefreshAvailableSpotOptions();
 
-        RefreshAvailability();
+        // Availability is read from the current reservation index every time.
+        // Polling refreshes the options when another user makes/cancels a booking.
+        _availabilityTimer.Interval = 2000;
+        _availabilityTimer.Tick += (s, e) => RefreshAvailableSpotOptions();
+        _availabilityTimer.Start();
+        FormClosed += (s, e) =>
+        {
+            _availabilityTimer.Stop();
+            _availabilityTimer.Dispose();
+        };
+
+        RefreshAvailableSpotOptions();
     }
 
-    // =========================================================
-    //  What happens when things change or get clicked
-    // =========================================================
-
-    // Seat / Table -> show seats.  Discussion Room -> show rooms.
     private void FillSpotList()
     {
-        _cmbSpot.Items.Clear();
-
-        List<string> spots = _cmbSpotType.SelectedIndex == 0
+        _allSpots.Clear();
+        _allSpots.AddRange(_cmbSpotType.SelectedIndex == 0
             ? ClirLayout.GetSeats()
-            : ClirLayout.GetDiscussionRooms();
+            : ClirLayout.GetDiscussionRooms());
 
-        _cmbSpot.Items.AddRange(spots.ToArray());
-        _cmbSpot.SelectedIndex = 0;      // this also triggers RefreshAvailability
+        RefreshAvailableSpotOptions();
     }
 
-    // Students: date is locked to today, year level is needed.
-    // Faculty: can pick upcoming dates, year level does not apply.
+    // Students are restricted to the current date. Faculty may select today
+    // or a later date. The service validates the rule again at submission.
     private void ApplyUserTypeRules()
     {
         bool isStudent = _cmbUserType.SelectedIndex == 0;
+        if (isStudent && _dtpDate.Value.Date != DateTime.Today)
+            _dtpDate.Value = DateTime.Today;
 
-        if (isStudent) _dtpDate.Value = DateTime.Today;
         _dtpDate.Enabled = !isStudent;
         _numYear.Enabled = isStudent;
+        RefreshAvailableSpotOptions();
     }
 
-    // Shows green "Available" or red "Not available" while the user picks the time.
-    private void RefreshAvailability()
+    private void RefreshAvailableSpotOptions()
     {
-        if (_cmbSpot.SelectedItem is not string spot) return;
+        if (_updatingSpotOptions || _allSpots.Count == 0 || IsDisposed)
+            return;
 
+        // Keep the picker aligned with the current day if the application was
+        // left open overnight. Assign Value before MinDate to avoid an invalid
+        // DateTimePicker range.
+        if (_dtpDate.MinDate.Date < DateTime.Today)
+        {
+            _updatingSpotOptions = true;
+            try
+            {
+                if (_dtpDate.Value.Date < DateTime.Today)
+                    _dtpDate.Value = DateTime.Today;
+                _dtpDate.MinDate = DateTime.Today;
+            }
+            finally
+            {
+                _updatingSpotOptions = false;
+            }
+        }
+
+        // Process overdue no-shows before rebuilding the list so released
+        // seats appear as soon as their grace period has ended.
+        _service.ProcessDueReservations();
+
+        string? previousSelection = _cmbSpot.SelectedItem as string;
         DateTime date = _dtpDate.Value.Date;
         TimeSpan start = _dtpStart.Value.TimeOfDay;
         TimeSpan end = _dtpEnd.Value.TimeOfDay;
 
-        // List the times that are already taken (earliest first).
+        // While the time range is incomplete/invalid, keep all locations in
+        // the list so the user can correct the time. For a valid future range,
+        // only show locations with no overlapping Active or Occupied booking.
+        bool validRange = end > start;
+        bool dateIsCurrentOrFuture = date.Date >= DateTime.Today;
+        bool startIsFuture = date.Date > DateTime.Today || start >= DateTime.Now.TimeOfDay;
+        List<string> available = validRange && dateIsCurrentOrFuture && startIsFuture
+            ? _allSpots.Where(spot => _service.IsAvailable(spot, date, start, end)).ToList()
+            : new List<string>(_allSpots);
+
+        _updatingSpotOptions = true;
+        try
+        {
+            _cmbSpot.BeginUpdate();
+            _cmbSpot.Items.Clear();
+            _cmbSpot.Items.AddRange(available.Cast<object>().ToArray());
+
+            if (previousSelection != null && available.Contains(previousSelection))
+                _cmbSpot.SelectedItem = previousSelection;
+            else if (_cmbSpot.Items.Count > 0)
+                _cmbSpot.SelectedIndex = 0;
+            else
+                _cmbSpot.SelectedIndex = -1;
+        }
+        finally
+        {
+            _cmbSpot.EndUpdate();
+            _updatingSpotOptions = false;
+        }
+
+        RefreshAvailability();
+    }
+
+    private void RefreshAvailability()
+    {
         _lstBooked.Items.Clear();
-        List<Reservation> booked = _service.GetBookedSlots(spot, date);
-        if (booked.Count == 0)
-            _lstBooked.Items.Add("(nothing yet - the whole day is free)");
-        foreach (Reservation r in booked)
-            _lstBooked.Items.Add($"{Clock(r.StartTime)} - {Clock(r.EndTime)}");
+        DateTime date = _dtpDate.Value.Date;
+        TimeSpan start = _dtpStart.Value.TimeOfDay;
+        TimeSpan end = _dtpEnd.Value.TimeOfDay;
+
+        if (date.Date < DateTime.Today)
+        {
+            SetAvailability("That date has already passed. Choose today or a future date.", Color.DarkOrange, false);
+            return;
+        }
 
         if (end <= start)
         {
-            _lblAvailability.ForeColor = Color.DarkOrange;
-            _lblAvailability.Text = "End time must be after the start time.";
+            SetAvailability("End time must be after the start time.", Color.DarkOrange, false);
+            return;
         }
-        else if (_service.IsAvailable(spot, date, start, end))
+
+        if (date == DateTime.Today && start < DateTime.Now.TimeOfDay)
         {
-            _lblAvailability.ForeColor = Color.SeaGreen;
-            _lblAvailability.Text = "Available at this time.";
+            SetAvailability("That start time has already passed. Choose a later time.", Color.DarkOrange, false);
+            return;
         }
+
+        if (_cmbSpot.SelectedItem is not string spot)
+        {
+            _lstBooked.Items.Add("No spaces are available for the selected time.");
+            SetAvailability("No available seats / rooms for this date and time.", Maroon, false);
+            return;
+        }
+
+        List<Reservation> booked = _service.GetBookedSlots(spot, date);
+        if (booked.Count == 0)
+            _lstBooked.Items.Add("No other reservations for this spot on this date.");
         else
         {
-            _lblAvailability.ForeColor = Maroon;
-            _lblAvailability.Text = "Not available - already reserved at this time.";
+            foreach (Reservation reservation in booked)
+            {
+                _lstBooked.Items.Add(
+                    $"{Clock(reservation.StartTime)} - {Clock(reservation.EndTime)} ({reservation.Status})");
+            }
         }
+
+        bool available = _service.IsAvailable(spot, date, start, end);
+        SetAvailability(
+            available ? "Available at this time." : "Not available - already reserved at this time.",
+            available ? Color.SeaGreen : Maroon,
+            available);
+    }
+
+    private void SetAvailability(string message, Color color, bool canReserve)
+    {
+        _lblAvailability.ForeColor = color;
+        _lblAvailability.Text = message;
+        if (_btnReserve != null)
+            _btnReserve.Enabled = canReserve;
     }
 
     private void btnReserve_Click(object? sender, EventArgs e)
     {
         bool isStudent = _cmbUserType.SelectedIndex == 0;
 
-        // 1. Collect everything the user typed into a request.
         var request = new ReservationRequest
         {
             UserName = _txtName.Text.Trim(),
@@ -217,17 +320,14 @@ public class MakeReservationForm : Form
             Department = _cmbDepartment.Text.Trim(),
             Program = _txtProgram.Text.Trim(),
             YearLevel = isStudent ? (int)_numYear.Value : 0,
-            SpotOrRoom = _cmbSpot.Text,
+            SpotOrRoom = _cmbSpot.SelectedItem?.ToString() ?? string.Empty,
             IsDiscussionRoom = _cmbSpotType.SelectedIndex == 1,
             Date = _dtpDate.Value.Date,
             StartTime = _dtpStart.Value.TimeOfDay,
             EndTime = _dtpEnd.Value.TimeOfDay
         };
 
-        // 2. Hand it to the service. It checks the rules and uses the queue.
         OperationResult result = _service.SubmitRequest(request);
-
-        // 3. Show the answer.
         MessageBox.Show(result.Message,
             result.Success ? "Reservation confirmed" : "Could not reserve",
             MessageBoxButtons.OK,
@@ -239,12 +339,11 @@ public class MakeReservationForm : Form
             _txtIdNumber.Clear();
             _txtProgram.Clear();
         }
-        RefreshAvailability();
-    }
 
-    // =========================================================
-    //  Small helpers that build the screen
-    // =========================================================
+        // Re-query after submission so the reserved location is removed from
+        // the available options immediately, without waiting for the timer.
+        RefreshAvailableSpotOptions();
+    }
 
     private void AddSectionTitle(string text, int y)
     {
@@ -266,11 +365,27 @@ public class MakeReservationForm : Form
         Controls.Add(control);
     }
 
+    private static DateTime GetDefaultStartTime()
+    {
+        DateTime candidate = DateTime.Now.AddMinutes(30);
+        candidate = new DateTime(candidate.Year, candidate.Month, candidate.Day,
+                                 candidate.Hour, candidate.Minute, 0);
+        if (candidate <= DateTime.Now)
+            candidate = candidate.AddMinutes(1);
+
+        // This application stores same-day time ranges. If there is no longer
+        // a future half-hour slot today, leave a late-day value for the user to
+        // change (the service will still reject a start time in the past).
+        if (candidate.Date != DateTime.Today)
+            candidate = DateTime.Today.AddHours(23);
+        return candidate;
+    }
+
     private static void SetupTimePicker(DateTimePicker picker, DateTime value)
     {
         picker.Format = DateTimePickerFormat.Custom;
-        picker.CustomFormat = "HH:mm";      // 24-hour clock, e.g. 14:00
-        picker.ShowUpDown = true;           // little up/down arrows instead of a calendar
+        picker.CustomFormat = "HH:mm";
+        picker.ShowUpDown = true;
         picker.Value = value;
     }
 
@@ -291,5 +406,5 @@ public class MakeReservationForm : Form
         return button;
     }
 
-    private static string Clock(TimeSpan t) => t.ToString(@"hh\:mm");
+    private static string Clock(TimeSpan time) => time.ToString(@"hh\:mm");
 }

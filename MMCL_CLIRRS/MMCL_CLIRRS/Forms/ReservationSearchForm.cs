@@ -1,15 +1,30 @@
-namespace MMCL_CLIRRS;
+﻿namespace MMCL_CLIRRS;
 
 public partial class ReservationSearchForm : Form
 {
+    private readonly ReservationManagementService? _management;
     private readonly ReservationSearchService _service;
     private Func<List<Reservation>> _currentSearch;
 
     public ReservationSearchForm(ReservationSearchService service)
+        : this(null, service)
+    {
+    }
+
+    public ReservationSearchForm(ReservationManagementService? management,
+                                 ReservationSearchService service)
     {
         InitializeComponent();
         ApplyGridTheme();
-        _service = service;
+        _management = management;
+        _service = service ?? throw new ArgumentNullException(nameof(service));
+        ReservationManagementService? managementService = _management;
+        if (managementService != null)
+        {
+            managementService.ReservationExpired += OnReservationExpired;
+            Shown += OnStaffScreenShown;
+            FormClosed += (s, e) => managementService.ReservationExpired -= OnReservationExpired;
+        }
 
         cmbFilter.Items.AddRange(new object[]
             { "Reservation ID", "Name", "User ID", "Date Range", "Spot/Room", "Status", "Discussion Rooms" });
@@ -31,6 +46,47 @@ public partial class ReservationSearchForm : Form
 
         UpdateInputVisibility();
         ShowResults(_service.GetAllChronological());
+    }
+
+
+    // Expiration notices that happened while the staff screen was closed are
+    // retained by the management service and shown when staff next opens it.
+    private void OnStaffScreenShown(object? sender, EventArgs e)
+    {
+        if (_management == null)
+            return;
+
+        foreach (ReservationExpirationNotice notice in _management.GetPendingExpirationNotifications())
+            ShowExpirationNotice(notice);
+    }
+
+    // Live no-show notifications are raised by the main-menu schedule monitor.
+    private void OnReservationExpired(ReservationExpirationNotice notice)
+    {
+        // If the form has not appeared yet, leave the notice pending for its
+        // Shown handler rather than losing the notification.
+        if (IsDisposed || !Visible)
+            return;
+
+        _management?.AcknowledgeExpirationNotification(notice.ReservationId);
+        ShowExpirationNotice(notice);
+    }
+
+    private void ShowExpirationNotice(ReservationExpirationNotice notice)
+    {
+        if (IsDisposed)
+            return;
+
+        ShowResults(_currentSearch());
+        MessageBox.Show(this,
+            $"Reservation #{notice.ReservationId} for {notice.UserName} was not occupied within " +
+            $"the 5-minute grace period.\n\n" +
+            $"Location: {notice.SpotOrRoom}\n" +
+            $"Scheduled start: {notice.ScheduledStart:dd MMM yyyy, HH:mm}\n" +
+            $"The location is now available for another reservation.",
+            "Reservation automatically expired",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     // Show date pickers only for date searches, the text box for the rest.
@@ -140,6 +196,13 @@ public partial class ReservationSearchForm : Form
     private void btnCancelReservation_Click(object? sender, EventArgs e)
     {
         if (!TryGetSelected(out Reservation selected)) return;
+        _management?.ProcessDueReservations();
+        if (selected.Status != ReservationStatus.Active)
+        {
+            MessageBox.Show("This reservation is no longer active and cannot be cancelled.");
+            ShowResults(_currentSearch());
+            return;
+        }
 
         DialogResult confirm = MessageBox.Show(
             $"Cancel reservation #{selected.ReservationId} for {selected.UserName}?",
@@ -155,6 +218,13 @@ public partial class ReservationSearchForm : Form
     private void btnUpdate_Click(object? sender, EventArgs e)
     {
         if (!TryGetSelected(out Reservation selected)) return;
+        _management?.ProcessDueReservations();
+        if (selected.Status != ReservationStatus.Active)
+        {
+            MessageBox.Show("This reservation is no longer active and cannot be updated.");
+            ShowResults(_currentSearch());
+            return;
+        }
 
         using var dialog = new UpdateReservationDialog(selected);
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
@@ -171,6 +241,13 @@ public partial class ReservationSearchForm : Form
     private void btnVerify_Click(object? sender, EventArgs e)
     {
         if (!TryGetSelected(out Reservation selected)) return;
+        _management?.ProcessDueReservations();
+        if (selected.Status != ReservationStatus.Active)
+        {
+            MessageBox.Show("This reservation is no longer active and cannot be verified.");
+            ShowResults(_currentSearch());
+            return;
+        }
 
         string? entered = PromptDialog.Show(this, "Verify Reservation",
             $"Enter the ID number of the person occupying {selected.SpotOrRoom}:");
@@ -185,6 +262,7 @@ public partial class ReservationSearchForm : Form
     }
     private void btnUndo_Click(object? sender, EventArgs e)
     {
+        _management?.ProcessDueReservations();
         string? next = _service.NextUndoDescription;
         if (next == null)
         {

@@ -1,0 +1,27 @@
+name: Build MMCL CLIRRS
+
+on:
+  push:
+    branches:
+      - Reservation-Scheduling
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore project
+        run: dotnet restore MMCL_CLIRRS/MMCL_CLIRRS/MMCL_CLIRRS.csproj
+
+      - name: Build project
+        run: dotnet build MMCL_CLIRRS/MMCL_CLIRRS/MMCL_CLIRRS.csproj --configuration Release --no-restore
