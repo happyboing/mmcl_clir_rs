@@ -397,85 +397,177 @@ public class SeatMapForm : Form
         g.FillPath(floorBrush, floorPath);
         g.DrawPath(wallPen, floorPath);
 
-        using var faintFont = new Font("Segoe UI", 8, FontStyle.Regular);
-        using var boldFont = new Font("Segoe UI", 8, FontStyle.Bold);
-        using var faintBrush = new SolidBrush(Color.FromArgb(158, 158, 158));
+        using var faintFont = new Font("Segoe UI", 8f, FontStyle.Regular);
+        using var tinyFont = new Font("Segoe UI", 6.4f, FontStyle.Bold);
+        using var cellBeanFont = new Font("Segoe UI", 5.5f, FontStyle.Bold);
+        using var boldFont = new Font("Segoe UI", 8f, FontStyle.Bold);
+        using var faintBrush = new SolidBrush(Color.FromArgb(150, 150, 150));
+        using var furnitureBrush = new SolidBrush(Color.FromArgb(224, 224, 224));
+        using var furniturePen = new Pen(Color.FromArgb(90, 90, 90), 2f);
         using var tableBrush = new SolidBrush(Color.FromArgb(236, 239, 241));
-        using var tablePen = new Pen(Color.FromArgb(96, 125, 139), 2);
-
-        // Reading-area labels.
-        g.DrawString("WINDOW AREA", faintFont, faintBrush, new PointF(26, 58));
-        g.DrawString("MAIN READING AREA", faintFont, faintBrush, new PointF(350, 252));
-        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(30, 288));
-        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(178, 474));
-        g.DrawString("DISCUSSION ROOM WING", faintFont, faintBrush, new PointF(735, 28));
-
-        // Small "table with monitors" decoration at the top-left.
-        using (var monitorTable = RoundedRect(new Rectangle(24, 4, 176, 28), 6))
-        {
-            using var monitorBrush = new SolidBrush(Color.FromArgb(224, 224, 224));
-            using var monitorPen = new Pen(Color.FromArgb(117, 117, 117), 1.5f);
-            g.FillPath(monitorBrush, monitorTable);
-            g.DrawPath(monitorPen, monitorTable);
-        }
-        for (int i = 0; i < 5; i++)
-            g.FillRectangle(Brushes.DimGray, 44 + i * 28, 13, 18, 10);
-        g.DrawString("monitors", faintFont, faintBrush, new PointF(24, 33));
-
-        // Bean-bag decoration along the top.
-        using (var beanBrush = new SolidBrush(Color.FromArgb(224, 224, 224)))
-        using (var beanPen = new Pen(Color.FromArgb(117, 117, 117), 1.5f))
-        {
-            for (int i = 0; i < 4; i++)
-            {
-                var bean = new Rectangle(296 + i * 32, 2, 28, 26);
-                g.FillEllipse(beanBrush, bean);
-                g.DrawEllipse(beanPen, bean);
-            }
-        }
-
-        // Round tables with their names.
-        for (int i = 0; i < ClirMapLayout.TableCenters.Count; i++)
-        {
-            Point center = ClirMapLayout.TableCenters[i];
-            var table = new Rectangle(center.X - 32, center.Y - 32, 64, 64);
-            g.FillEllipse(tableBrush, table);
-            g.DrawEllipse(tablePen, table);
-
-            var format = new StringFormat
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center
-            };
-            g.DrawString($"Table {i + 1}", boldFont, Brushes.DimGray, table, format);
-        }
-
-        // Couches near the bottom.
-        DrawFurniture(g, new Rectangle(322, 532, 170, 20), "couch");
-        DrawFurniture(g, new Rectangle(506, 532, 112, 20), "couch");
-
-        // Fixed parts of the room.
-        DrawFurniture(g, new Rectangle(20, 512, 110, 30), "exit");
-        DrawFurniture(g, new Rectangle(730, 512, 152, 30), "entrance");
-        DrawFurniture(g, new Rectangle(790, 368, 100, 44), "staff");
-    }
-
-    private static void DrawFurniture(Graphics g, Rectangle bounds, string text)
-    {
-        using GraphicsPath path = RoundedRect(bounds, 7);
-        using var fill = new SolidBrush(Color.FromArgb(224, 224, 224));
-        using var line = new Pen(Color.FromArgb(117, 117, 117), 1.7f);
-        using var font = new Font("Segoe UI", 9, FontStyle.Bold);
-
-        g.FillPath(fill, path);
-        g.DrawPath(line, path);
-
-        var format = new StringFormat
+        using var tablePen = new Pen(Color.FromArgb(96, 125, 139), 2f);
+        using var beanBrush = new SolidBrush(Color.FromArgb(228, 228, 228));
+        using var beanPen = new Pen(Color.FromArgb(110, 110, 110), 1.4f);
+        using var dividerPen = new Pen(Color.FromArgb(110, 110, 110), 2f);
+        using var centerFormat = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        g.DrawString(text, font, Brushes.DimGray, bounds, format);
+
+        // Reading-area labels, matching the labels on the CLIR sketch.
+        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(24, 190));
+        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(172, 474));
+        g.DrawString("DISCUSSION ROOM", faintFont, faintBrush, new PointF(780, 270));
+
+        // Tilted "table with monitors" in the upper-left corner.
+        DrawMonitorTable(g);
+
+        // Four bean bags along the top wall.
+        for (int i = 0; i < 4; i++)
+            DrawBeanBag(g, new Rectangle(252 + i * 46, 8, 40, 38), tinyFont, beanBrush, beanPen);
+
+        // Four bean bags resting on a row of small tables.
+        for (int i = 0; i < 4; i++)
+        {
+            var cell = new Rectangle(240 + i * 62, 145, 58, 58);
+            using GraphicsPath cellPath = RoundedRect(cell, 5);
+            g.FillPath(furnitureBrush, cellPath);
+            g.DrawPath(furniturePen, cellPath);
+
+            DrawBeanBag(g, new Rectangle(cell.X + 14, cell.Y + 5, 30, 27),
+                cellBeanFont, beanBrush, beanPen);
+
+            g.DrawString("table", tinyFont, Brushes.DimGray,
+                new RectangleF(cell.X, cell.Bottom - 17, cell.Width, 14), centerFormat);
+        }
+
+        // Decorative round object between the left tables and the centre table.
+        DrawFan(g, 200, 310);
+
+        // Round tables with their names.
+        int[] radii = { 28, 28, 38, 36, 34 };
+        for (int i = 0; i < ClirMapLayout.TableCenters.Count; i++)
+        {
+            Point center = ClirMapLayout.TableCenters[i];
+            var table = new Rectangle(center.X - radii[i], center.Y - radii[i],
+                                      radii[i] * 2, radii[i] * 2);
+            g.FillEllipse(tableBrush, table);
+            g.DrawEllipse(tablePen, table);
+
+            g.DrawString($"Table {i + 1}", boldFont, Brushes.DimGray,
+                new RectangleF(table.X, table.Y, table.Width, table.Height), centerFormat);
+        }
+
+        // Couches in the middle/bottom area.
+        DrawFurniture(g, new Rectangle(470, 350, 38, 140), "couch", 7f);
+        DrawFurniture(g, new Rectangle(510, 350, 38, 140), "couch", 7f);
+        DrawFurniture(g, new Rectangle(500, 500, 220, 36), "couch", 8f);
+
+        // Three loose chairs at the bottom.
+        DrawFurniture(g, new Rectangle(230, 505, 55, 30), "chair", 7f);
+        DrawFurniture(g, new Rectangle(295, 505, 55, 30), "chair", 7f);
+        DrawFurniture(g, new Rectangle(360, 505, 55, 30), "chair", 7f);
+
+        // Small rectangular table near the bottom-right.
+        DrawFurniture(g, new Rectangle(585, 420, 100, 50), "table", 8f);
+
+        // Staff corner and the discussion-room block.
+        DrawFurniture(g, new Rectangle(770, 205, 110, 60), "staff", 9.5f);
+
+        using (GraphicsPath roomWing = RoundedRect(new Rectangle(770, 285, 112, 230), 8))
+        {
+            using var roomFill = new SolidBrush(Color.FromArgb(245, 245, 245));
+            using var roomPen = new Pen(Color.FromArgb(90, 90, 90), 2.5f);
+            g.FillPath(roomFill, roomWing);
+            g.DrawPath(roomPen, roomWing);
+        }
+
+        // Short wall separating the reading area from the right-hand wing.
+        g.DrawLine(dividerPen, 760, 140, 760, 520);
+
+        // Entrance and exit at the bottom.
+        DrawFurniture(g, new Rectangle(20, 520, 110, 28), "exit", 8.5f);
+        DrawFurniture(g, new Rectangle(740, 520, 140, 28), "entrance", 8.5f);
+    }
+
+    private static void DrawBeanBag(Graphics g, Rectangle bounds, Font font, Brush fill, Pen pen)
+    {
+        g.FillEllipse(fill, bounds);
+        g.DrawEllipse(pen, bounds);
+
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+        g.DrawString("bean bag", font, Brushes.DimGray,
+            new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height), format);
+    }
+
+    private static void DrawFan(Graphics g, int centerX, int centerY)
+    {
+        using var fill = new SolidBrush(Color.FromArgb(245, 245, 245));
+        using var pen = new Pen(Color.FromArgb(96, 125, 139), 1.6f);
+        var circle = new Rectangle(centerX - 27, centerY - 27, 54, 54);
+
+        g.FillEllipse(fill, circle);
+        g.DrawEllipse(pen, circle);
+
+        for (int i = 0; i < 8; i++)
+        {
+            double angle = i * Math.PI / 4;
+            g.DrawLine(pen, centerX, centerY,
+                centerX + (int)(26 * Math.Cos(angle)),
+                centerY + (int)(26 * Math.Sin(angle)));
+        }
+    }
+
+    private static void DrawMonitorTable(Graphics g)
+    {
+        using var fill = new SolidBrush(Color.FromArgb(224, 224, 224));
+        using var line = new Pen(Color.FromArgb(80, 80, 80), 2f);
+        using var monitorBrush = new SolidBrush(Color.FromArgb(60, 60, 60));
+        using var labelFont = new Font("Segoe UI", 7.5f, FontStyle.Bold);
+        using var labelBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
+
+        GraphicsState state = g.Save();
+        g.TranslateTransform(130, 95);
+        g.RotateTransform(-18);
+
+        using (GraphicsPath tablePath = RoundedRect(new Rectangle(-88, -20, 176, 40), 6))
+        {
+            g.FillPath(fill, tablePath);
+            g.DrawPath(line, tablePath);
+        }
+
+        for (int i = 0; i < 5; i++)
+            g.FillRectangle(monitorBrush, -72 + i * 30, -12, 20, 12);
+
+        for (int i = 0; i < 5; i++)
+            g.FillRectangle(monitorBrush, -74 + i * 32, 22, 16, 11);
+
+        g.Restore(state);
+        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(55, 55));
+    }
+
+    private static void DrawFurniture(Graphics g, Rectangle bounds, string text, float fontSize = 8.5f)
+    {
+        using GraphicsPath path = RoundedRect(bounds, 7);
+        using var fill = new SolidBrush(Color.FromArgb(224, 224, 224));
+        using var line = new Pen(Color.FromArgb(90, 90, 90), 1.7f);
+        using var font = new Font("Segoe UI", fontSize, FontStyle.Bold);
+
+        g.FillPath(fill, path);
+        g.DrawPath(line, path);
+
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+        g.DrawString(text, font, Brushes.DimGray,
+            new RectangleF(bounds.X, bounds.Y, bounds.Width, bounds.Height), format);
     }
 
     // =========================================================

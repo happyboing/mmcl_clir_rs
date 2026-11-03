@@ -64,13 +64,15 @@ public sealed class SeatSpotControl : Control
         => Availability == SpotAvailability.Reserved && Reservation != null;
 
     private Rectangle ChairBounds
-        => new Rectangle((Width - 40) / 2, 0, 40, 28);
+        => new Rectangle((Width - 28) / 2, 0, 28, 24);
 
     private Rectangle RoomBodyBounds
         => new Rectangle(0, 0, Width - 1, Height - 25);
 
     private Rectangle CancelBounds
-        => new Rectangle(0, Height - 21, Width, 19);
+        => Spot.Kind == ClirSpotKind.Seat
+            ? new Rectangle((Width - 36) / 2, Height - 16, 36, 14)
+            : new Rectangle(4, Height - 17, Width - 8, 15);
 
     public void UpdateState(SpotSnapshot snapshot)
     {
@@ -110,7 +112,7 @@ public sealed class SeatSpotControl : Control
     private void DrawSeat(Graphics g, Color fill, Color line, Color text)
     {
         Rectangle body = ChairBounds;
-        using GraphicsPath path = RoundedRect(body, 9);
+        using GraphicsPath path = RoundedRect(body, 7);
         using var fillBrush = new SolidBrush(fill);
         using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
 
@@ -118,18 +120,18 @@ public sealed class SeatSpotControl : Control
         g.DrawPath(linePen, path);
 
         // A small backrest makes the shape read as a chair.
-        using var backPen = new Pen(Color.FromArgb(120, line), 1.5f);
-        g.DrawLine(backPen, body.Left + 8, body.Top + 6, body.Right - 8, body.Top + 6);
+        using var backPen = new Pen(Color.FromArgb(120, line), 1.2f);
+        g.DrawLine(backPen, body.Left + 6, body.Top + 5, body.Right - 6, body.Top + 5);
 
-        using var numberFont = new Font("Segoe UI", 8f, FontStyle.Bold);
+        using var numberFont = new Font("Segoe UI", 7f, FontStyle.Bold);
         using var textBrush = new SolidBrush(text);
         var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        g.DrawString($"S{Spot.SeatNumber}", numberFont, textBrush,
-            new RectangleF(body.Left, body.Top + 5, body.Width, body.Height - 5), format);
+        g.DrawString(Spot.SeatNumber.ToString(), numberFont, textBrush,
+            new RectangleF(body.Left, body.Top + 4, body.Width, body.Height - 4), format);
     }
 
     private void DrawRoom(Graphics g, Color fill, Color line, Color text)
@@ -145,15 +147,15 @@ public sealed class SeatSpotControl : Control
         string[] words = Spot.SpotOrRoom.Split(' ');
         string number = words[^1];
 
-        using var titleFont = new Font("Segoe UI", 8f, FontStyle.Bold);
-        using var numberFont = new Font("Segoe UI", 11f, FontStyle.Bold);
+        using var titleFont = new Font("Segoe UI", 6.5f, FontStyle.Bold);
+        using var numberFont = new Font("Segoe UI", 9f, FontStyle.Bold);
         using var textBrush = new SolidBrush(text);
         var format = new StringFormat { Alignment = StringAlignment.Center };
 
-        g.DrawString("Discussion", titleFont, textBrush,
-            new RectangleF(body.Left, body.Top + 9, body.Width, 16), format);
+        g.DrawString("DISCUSSION", titleFont, textBrush,
+            new RectangleF(body.Left, body.Top + 4, body.Width, 12), format);
         g.DrawString($"Room {number}", numberFont, textBrush,
-            new RectangleF(body.Left, body.Top + 27, body.Width, 22), format);
+            new RectangleF(body.Left, body.Top + 16, body.Width, 18), format);
     }
 
     private void DrawCancelButton(Graphics g)
@@ -166,7 +168,8 @@ public sealed class SeatSpotControl : Control
 
         g.FillPath(fillBrush, path);
 
-        using var font = new Font("Segoe UI", 8f, FontStyle.Bold);
+        using var font = new Font("Segoe UI",
+            Spot.Kind == ClirSpotKind.Seat ? 7f : 8f, FontStyle.Bold);
         var format = new StringFormat
         {
             Alignment = StringAlignment.Center,
