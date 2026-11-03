@@ -14,6 +14,7 @@ public static class ClirLayout
     public const int BeanBagCount = 5;
     public const int BeanBagTableCount = 5;
     public const int FloorChairCount = 3;
+    public const int FloorAreaCount = 2;
 
     // Every reservable seat, couch, bean bag and table.
     public static List<string> GetSeats()
@@ -43,6 +44,9 @@ public static class ClirLayout
 
         for (int i = 1; i <= FloorChairCount; i++)
             seats.Add($"Floor Chair {i}");
+
+        for (int i = 1; i <= FloorAreaCount; i++)
+            seats.Add($"Floor Area {i}");
 
         seats.Add("Small Table");
         return seats;

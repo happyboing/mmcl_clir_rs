@@ -89,7 +89,7 @@ public static class ClirMapLayout
         {
             var bounds = new Rectangle(
                 40 + i * 35 - (MonitorSeatWidth / 2),
-                150 - 12,
+                130 - 12,
                 MonitorSeatWidth,
                 MonitorSeatHeight);
 
@@ -126,7 +126,7 @@ public static class ClirMapLayout
                 new Rectangle(210 + i * 62, 8, 56, 58)));
         }
 
-        // Five small tables in a row, each with one bean-bag seat on top.
+        // Five small tables in a row, each with one bean-bag seat above it.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
             int cellX = 210 + i * 62;
@@ -136,7 +136,7 @@ public static class ClirMapLayout
                 $"Bean Bag Table {i + 1}",
                 "Main Reading Area",
                 1,
-                new Rectangle(cellX + 6, 147, 46, 54)));
+                new Rectangle(cellX + 1, 80, 56, 58)));
         }
 
         // Couches in the middle and along the bottom.
@@ -158,6 +158,12 @@ public static class ClirMapLayout
                 i + 1,
                 new Rectangle(230 + i * 65, 498, 55, 44)));
         }
+
+        // The two open floor areas are reservable too.
+        spots.Add(new ClirMapSpot("Floor Area 1", ClirSpotKind.FloorArea, "—",
+            "Floor Area", 0, new Rectangle(16, 185, 150, 40)));
+        spots.Add(new ClirMapSpot("Floor Area 2", ClirSpotKind.FloorArea, "—",
+            "Floor Area", 0, new Rectangle(176, 456, 150, 40)));
 
         // The small rectangular reading table.
         spots.Add(new ClirMapSpot("Small Table", ClirSpotKind.Table, "—",

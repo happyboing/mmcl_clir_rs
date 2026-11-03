@@ -90,7 +90,7 @@ public sealed class SeatSpotControl : Control
         ClirSpotKind.Seat or ClirSpotKind.MonitorSeat => ChairBounds,
         ClirSpotKind.BeanBag => BeanBagBounds,
         ClirSpotKind.Couch or ClirSpotKind.Table => FurnitureBodyBounds,
-        ClirSpotKind.DiscussionRoom => FurnitureBodyBounds,
+        ClirSpotKind.FloorArea or ClirSpotKind.DiscussionRoom => FurnitureBodyBounds,
         _ => ClientRectangle
     };
 
@@ -142,6 +142,9 @@ public sealed class SeatSpotControl : Control
                 break;
             case ClirSpotKind.Table:
                 DrawTable(e.Graphics, fill, line, text);
+                break;
+            case ClirSpotKind.FloorArea:
+                DrawFloorArea(e.Graphics, fill, line, text);
                 break;
             case ClirSpotKind.DiscussionRoom:
                 DrawRoom(e.Graphics, fill, line, text);
@@ -200,7 +203,7 @@ public sealed class SeatSpotControl : Control
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        g.DrawString("bean bag", font, textBrush,
+        g.DrawString("Bean Bag", font, textBrush,
             new RectangleF(body.X, body.Y, body.Width, body.Height), format);
     }
 
@@ -228,13 +231,13 @@ public sealed class SeatSpotControl : Control
             GraphicsState state = g.Save();
             g.TranslateTransform(Width / 2f, body.Height / 2f);
             g.RotateTransform(-90);
-            g.DrawString("couch", font, textBrush,
+            g.DrawString("Couch", font, textBrush,
                 new RectangleF(-body.Height / 2f, -12f, body.Height, 24f), format);
             g.Restore(state);
         }
         else
         {
-            g.DrawString("couch", font, textBrush,
+            g.DrawString("Couch", font, textBrush,
                 new RectangleF(body.X, body.Y, body.Width, body.Height), format);
         }
     }
@@ -255,7 +258,27 @@ public sealed class SeatSpotControl : Control
 
         g.FillPath(fillBrush, path);
         g.DrawPath(linePen, path);
-        g.DrawString("table", font, textBrush,
+        g.DrawString("Table", font, textBrush,
+            new RectangleF(body.X, body.Y, body.Width, body.Height), format);
+    }
+
+    private void DrawFloorArea(Graphics g, Color fill, Color line, Color text)
+    {
+        Rectangle body = FurnitureBodyBounds;
+        using GraphicsPath path = RoundedRect(body, 8);
+        using var fillBrush = new SolidBrush(fill);
+        using var linePen = new Pen(_hoverSpot ? SelectedLine : line, _hoverSpot ? 2.5f : 2f);
+        using var font = new Font("Segoe UI", 8.5f, FontStyle.Bold);
+        using var textBrush = new SolidBrush(text);
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+
+        g.FillPath(fillBrush, path);
+        g.DrawPath(linePen, path);
+        g.DrawString(Spot.SpotOrRoom, font, textBrush,
             new RectangleF(body.X, body.Y, body.Width, body.Height), format);
     }
 
@@ -282,7 +305,7 @@ public sealed class SeatSpotControl : Control
         };
 
         float centerY = body.Top + body.Height / 2f;
-        g.DrawString("DISCUSSION", titleFont, textBrush,
+        g.DrawString("Discussion", titleFont, textBrush,
             new RectangleF(body.Left, centerY - 28, body.Width, 14), format);
         g.DrawString($"Room {number}", numberFont, textBrush,
             new RectangleF(body.Left, centerY - 8, body.Width, 22), format);

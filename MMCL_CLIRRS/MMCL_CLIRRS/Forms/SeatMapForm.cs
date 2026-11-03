@@ -415,27 +415,19 @@ public class SeatMapForm : Form
         g.FillRectangle(floorBrush, new Rectangle(42, 548, openWidth, 5));
         g.FillRectangle(mapBackgroundBrush, new Rectangle(42, 552, openWidth, 6));
 
-        using var faintFont = new Font("Segoe UI", 8f, FontStyle.Regular);
         using var tinyFont = new Font("Segoe UI", 6.4f, FontStyle.Bold);
         using var boldFont = new Font("Segoe UI", 8f, FontStyle.Bold);
-        using var faintBrush = new SolidBrush(Color.FromArgb(150, 150, 150));
         using var furnitureBrush = new SolidBrush(Color.FromArgb(224, 224, 224));
         using var furniturePen = new Pen(Color.FromArgb(90, 90, 90), 2f);
         using var tableBrush = new SolidBrush(Color.FromArgb(236, 239, 241));
         using var tablePen = new Pen(Color.FromArgb(96, 125, 139), 2f);
-        using var dividerPen = new Pen(Color.FromArgb(110, 110, 110), 2f);
         using var centerFormat = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
 
-        // Reading-area labels, matching the labels on the CLIR sketch.
-        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(24, 190));
-        g.DrawString("FLOOR AREA", faintFont, faintBrush, new PointF(172, 474));
-        g.DrawString("DISCUSSION ROOM", faintFont, faintBrush, new PointF(780, 165));
-
-        // Straight "table with monitors" in the upper-left corner.
+        // Straight table with monitors in the upper-left corner.
         DrawMonitorTable(g);
 
         // Five small tables, each with one seat underneath.
@@ -446,7 +438,7 @@ public class SeatMapForm : Form
             g.FillPath(furnitureBrush, cellPath);
             g.DrawPath(furniturePen, cellPath);
 
-            g.DrawString("table", tinyFont, Brushes.DimGray,
+            g.DrawString("Table", tinyFont, Brushes.DimGray,
                 new RectangleF(cell.X, cell.Bottom + 2, cell.Width, 14), centerFormat);
         }
 
@@ -473,12 +465,9 @@ public class SeatMapForm : Form
             g.DrawPath(roomPen, wingPath);
         }
 
-        // Short wall separating the reading area from the right-hand wing.
-        g.DrawLine(dividerPen, 760, 140, 760, 520);
-
         // Entrance and exit sit flush with the open bottom edge.
-        DrawFurniture(g, new Rectangle(24, 524, 110, 28), "exit", 8.5f);
-        DrawFurniture(g, new Rectangle(724, 524, 150, 28), "entrance", 8.5f);
+        DrawFurniture(g, new Rectangle(24, 524, 110, 28), "Exit", 8.5f);
+        DrawFurniture(g, new Rectangle(724, 524, 150, 28), "Entrance", 8.5f);
     }
 
     private static void DrawMonitorTable(Graphics g)
@@ -497,7 +486,7 @@ public class SeatMapForm : Form
         for (int i = 0; i < 5; i++)
             g.FillRectangle(monitorBrush, 30 + i * 32, 84, 20, 12);
 
-        g.DrawString("table with monitors", labelFont, labelBrush, new PointF(30, 48));
+        g.DrawString("Table with Monitors", labelFont, labelBrush, new PointF(30, 48));
     }
 
     private static void DrawFurniture(Graphics g, Rectangle bounds, string text, float fontSize = 8.5f)

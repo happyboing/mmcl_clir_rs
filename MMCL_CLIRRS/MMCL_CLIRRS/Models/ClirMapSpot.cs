@@ -8,6 +8,7 @@ public enum ClirSpotKind
     BeanBag,
     Couch,
     Table,
+    FloorArea,
     DiscussionRoom
 }
 
@@ -31,6 +32,7 @@ public sealed record ClirMapSpot(
         ClirSpotKind.BeanBag => "Bean Bag",
         ClirSpotKind.Couch => "Couch",
         ClirSpotKind.Table => "Table",
+        ClirSpotKind.FloorArea => "Floor Area",
         _ => "Seat"
     };
 }
