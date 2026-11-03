@@ -13,7 +13,7 @@ public class MakeReservationForm : Form
     private readonly TextBox _txtIdNumber = new TextBox();
     private readonly ComboBox _cmbUserType = new ComboBox();
     private readonly ComboBox _cmbDepartment = new ComboBox();
-    private readonly TextBox _txtProgram = new TextBox();
+    private readonly ComboBox _cmbProgram = new ComboBox();
     private readonly NumericUpDown _numYear = new NumericUpDown();
 
     private readonly ComboBox _cmbSpotType = new ComboBox();
@@ -63,13 +63,13 @@ public class MakeReservationForm : Form
         AddRow("I am a:", _cmbUserType, 168);
 
         _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
-        _cmbDepartment.Items.AddRange(new object[]
-        {
-            "CAS", "CCIS", "CHS", "CMET", "ETYCB", "MIA", "MITL", "SHS"
-        });
-        _cmbDepartment.SelectedIndex = 0;
+        _cmbDepartment.Items.AddRange(AcademicPrograms.Departments);
         AddRow("Department:", _cmbDepartment, 206);
-        AddRow("Program:", _txtProgram, 244);
+        _cmbDepartment.SelectedIndex = 0;
+
+        _cmbProgram.DropDownStyle = ComboBoxStyle.DropDownList;
+        AddRow("Program:", _cmbProgram, 244);
+        _cmbDepartment.SelectedIndexChanged += (s, e) => FillPrograms();
 
         _numYear.Minimum = 1;
         _numYear.Maximum = 6;
@@ -125,6 +125,7 @@ public class MakeReservationForm : Form
         Controls.Add(btnClose);
 
         // ----- fill the spot list, then start listening for changes -----
+        FillPrograms();
         FillSpotList();
         ApplyUserTypeRules();
 
@@ -141,6 +142,19 @@ public class MakeReservationForm : Form
     // =========================================================
     //  What happens when things change or get clicked
     // =========================================================
+
+    private void FillPrograms()
+    {
+        _cmbProgram.Items.Clear();
+
+        if (_cmbDepartment.SelectedItem is not string department) return;
+
+        foreach (string program in AcademicPrograms.GetPrograms(department))
+            _cmbProgram.Items.Add(program);
+
+        if (_cmbProgram.Items.Count > 0)
+            _cmbProgram.SelectedIndex = 0;
+    }
 
     // Seat / Table -> show seats.  Discussion Room -> show rooms.
     private void FillSpotList()
@@ -211,7 +225,7 @@ public class MakeReservationForm : Form
             UserIdNumber = _txtIdNumber.Text.Trim(),
             UserType = isStudent ? UserType.Student : UserType.Faculty,
             Department = _cmbDepartment.Text.Trim(),
-            Program = _txtProgram.Text.Trim(),
+            Program = _cmbProgram.Text.Trim(),
             YearLevel = isStudent ? (int)_numYear.Value : 0,
             SpotOrRoom = _cmbSpot.Text,
             IsDiscussionRoom = _cmbSpotType.SelectedIndex == 1,
@@ -233,7 +247,6 @@ public class MakeReservationForm : Form
         {
             _txtName.Clear();
             _txtIdNumber.Clear();
-            _txtProgram.Clear();
         }
         RefreshAvailability();
     }

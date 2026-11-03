@@ -14,7 +14,7 @@ public class ReserveSpotDialog : Form
     private readonly TextBox _txtIdNumber = new TextBox();
     private readonly ComboBox _cmbUserType = new ComboBox();
     private readonly ComboBox _cmbDepartment = new ComboBox();
-    private readonly TextBox _txtProgram = new TextBox();
+    private readonly ComboBox _cmbProgram = new ComboBox();
     private readonly NumericUpDown _numYear = new NumericUpDown();
 
     private readonly DateTimePicker _dtpDate = new DateTimePicker();
@@ -83,13 +83,13 @@ public class ReserveSpotDialog : Form
         AddRow("I am a:", _cmbUserType, 222);
 
         _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
-        _cmbDepartment.Items.AddRange(new object[]
-        {
-            "CAS", "CCIS", "CHS", "CMET", "ETYCB", "MIA", "MITL", "SHS"
-        });
-        _cmbDepartment.SelectedIndex = 0;
+        _cmbDepartment.Items.AddRange(AcademicPrograms.Departments);
         AddRow("Department:", _cmbDepartment, 260);
-        AddRow("Program:", _txtProgram, 298);
+        _cmbDepartment.SelectedIndex = 0;
+
+        _cmbProgram.DropDownStyle = ComboBoxStyle.DropDownList;
+        AddRow("Program:", _cmbProgram, 298);
+        _cmbDepartment.SelectedIndexChanged += (s, e) => FillPrograms();
 
         _numYear.Minimum = 1;
         _numYear.Maximum = 6;
@@ -146,12 +146,26 @@ public class ReserveSpotDialog : Form
         Controls.Add(btnReserve);
         Controls.Add(btnClose);
 
+        FillPrograms();
         ApplyUserTypeRules();
         _cmbUserType.SelectedIndexChanged += (s, e) => ApplyUserTypeRules();
         _dtpDate.ValueChanged += (s, e) => RefreshAvailability();
         _dtpStart.ValueChanged += (s, e) => RefreshAvailability();
         _dtpEnd.ValueChanged += (s, e) => RefreshAvailability();
         RefreshAvailability();
+    }
+
+    private void FillPrograms()
+    {
+        _cmbProgram.Items.Clear();
+
+        if (_cmbDepartment.SelectedItem is not string department) return;
+
+        foreach (string program in AcademicPrograms.GetPrograms(department))
+            _cmbProgram.Items.Add(program);
+
+        if (_cmbProgram.Items.Count > 0)
+            _cmbProgram.SelectedIndex = 0;
     }
 
     private void ApplyUserTypeRules()
@@ -203,7 +217,7 @@ public class ReserveSpotDialog : Form
             UserIdNumber = _txtIdNumber.Text.Trim(),
             UserType = isStudent ? UserType.Student : UserType.Faculty,
             Department = _cmbDepartment.Text.Trim(),
-            Program = _txtProgram.Text.Trim(),
+            Program = _cmbProgram.Text.Trim(),
             YearLevel = isStudent ? (int)_numYear.Value : 0,
             SpotOrRoom = _spot.SpotOrRoom,
             IsDiscussionRoom = _spot.IsDiscussionRoom,

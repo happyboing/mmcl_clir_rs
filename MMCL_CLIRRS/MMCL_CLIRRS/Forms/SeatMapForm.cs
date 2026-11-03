@@ -66,8 +66,9 @@ public class SeatMapForm : Form
         BuildMap();
         BuildDetailsPanel();
 
-        SetPickersToNow();
+        RestoreSessionOrNow();
         RefreshMap();
+        RestoreSelectedSpot();
 
         _refreshTimer.Interval = 30_000;
         _refreshTimer.Tick += (s, e) =>
@@ -86,6 +87,7 @@ public class SeatMapForm : Form
 
         FormClosed += (s, e) =>
         {
+            SaveSessionState();
             _refreshTimer.Dispose();
             _toolTip.Dispose();
         };
@@ -571,6 +573,7 @@ public class SeatMapForm : Form
         _pieControl?.UpdateStates(_snapshots, _selectedSpot);
         UpdateDetails();
         UpdateClockLabel();
+        SaveSessionState();
     }
 
     private void SeatControl_SpotClicked(object? sender, EventArgs e)
@@ -600,6 +603,9 @@ public class SeatMapForm : Form
 
         _pieControl?.UpdateStates(_snapshots, spot);
         UpdateDetails();
+
+        SeatMapSession.SelectedSpot = spot.SpotOrRoom;
+        SaveSessionState();
     }
 
     private void PieControl_CancelClicked(ClirMapSpot spot)
@@ -791,6 +797,44 @@ public class SeatMapForm : Form
     // =========================================================
     //  Date / time helpers
     // =========================================================
+
+    private void RestoreSessionOrNow()
+    {
+        if (SeatMapSession.ViewDate is DateTime date &&
+            SeatMapSession.ViewTime is TimeSpan time)
+        {
+            _updatingPickers = true;
+            _dtpDate.Value = date.Date;
+            _dtpTime.Value = DateTime.Today.Add(time);
+            _updatingPickers = false;
+            _followingNow = false;
+            return;
+        }
+
+        SetPickersToNow();
+    }
+
+    private void RestoreSelectedSpot()
+    {
+        if (SeatMapSession.SelectedSpot is not string spotName) return;
+
+        ClirMapSpot? spot = ClirMapLayout.Spots
+            .FirstOrDefault(s => s.SpotOrRoom == spotName);
+
+        if (spot == null)
+        {
+            SeatMapSession.SelectedSpot = null;
+            return;
+        }
+
+        SelectSpot(spot);
+    }
+
+    private void SaveSessionState()
+    {
+        SeatMapSession.ViewDate = _dtpDate.Value.Date;
+        SeatMapSession.ViewTime = _dtpTime.Value.TimeOfDay;
+    }
 
     private void SetPickersToNow()
     {
