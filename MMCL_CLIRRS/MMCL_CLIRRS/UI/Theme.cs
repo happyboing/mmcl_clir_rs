@@ -578,7 +578,6 @@ public sealed class PillLabel : Control
 public sealed class MenuCard : Control
 {
     private string _title = "";
-    private string _subtitle = "";
     private string _badge = "";
     private string _icon = "\uE8A7";
     private Color _accent = Theme.Primary;
@@ -589,13 +588,6 @@ public sealed class MenuCard : Control
     {
         get => _title;
         set { _title = value; Invalidate(); }
-    }
-
-    [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-    public string Subtitle
-    {
-        get => _subtitle;
-        set { _subtitle = value; Invalidate(); }
     }
 
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -676,20 +668,16 @@ public sealed class MenuCard : Control
         int textWidth = Width - textLeft - 46;
         if (_badge.Length > 0) textWidth -= 46;
 
-        using var titleFont = Theme.Font(11f, FontStyle.Bold);
+        using var titleFont = Theme.Font(11.5f, FontStyle.Bold);
         using var titleBrush = new SolidBrush(Theme.Ink);
-        g.DrawString(_title, titleFont, titleBrush,
-            new RectangleF(textLeft, 21, textWidth, 24));
-
-        using var subFont = Theme.Font(8.6f);
-        using var subBrush = new SolidBrush(Theme.Muted);
-        using var subFormat = new StringFormat
+        using var titleFormat = new StringFormat
         {
+            LineAlignment = StringAlignment.Center,
             Trimming = StringTrimming.EllipsisCharacter,
             FormatFlags = StringFormatFlags.NoWrap
         };
-        g.DrawString(_subtitle, subFont, subBrush,
-            new RectangleF(textLeft, 48, Math.Max(20, Width - textLeft - 60), 22), subFormat);
+        g.DrawString(_title, titleFont, titleBrush,
+            new RectangleF(textLeft, 0, textWidth, Height), titleFormat);
 
         if (_badge.Length > 0)
         {

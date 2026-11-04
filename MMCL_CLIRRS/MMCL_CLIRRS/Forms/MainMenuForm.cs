@@ -42,22 +42,10 @@ public class MainMenuForm : Form
         shell.Controls.Add(BuildActionPanel(), 1, 0);
         Controls.Add(shell);
 
-        var mapCard = MakeCard(
-            "Interactive seat map",
-            "See what is free right now and reserve or cancel from the floor plan.",
-            "\uE707", Theme.Primary, 146);
-        var manageCard = MakeCard(
-            "Search & manage",
-            "Find any reservation, verify students, update details, or undo the last change.",
-            "\uE721", Theme.Info, 242);
-        var reportsCard = MakeCard(
-            "Reports & statistics",
-            "Review usage trends, outcomes, and recent activity at a glance.",
-            "\uE9D9", Theme.Gold, 338);
-        _alertsCard = MakeCard(
-            "Grace-period alerts",
-            "Check seats released after the check-in window.",
-            "\uE7BA", Theme.Warning, 434);
+        var mapCard = MakeCard("Interactive seat map", "\uE707", Theme.Primary, 146);
+        var manageCard = MakeCard("Search & manage", "\uE721", Theme.Info, 242);
+        var reportsCard = MakeCard("Reports & statistics", "\uE9D9", Theme.Gold, 338);
+        _alertsCard = MakeCard("Grace-period alerts", "\uE7BA", Theme.Warning, 434);
 
         var actionPanel = (Panel)shell.GetControlFromPosition(1, 0)!;
         actionPanel.Controls.Add(mapCard);
@@ -177,13 +165,12 @@ public class MainMenuForm : Form
         return panel;
     }
 
-    private static MenuCard MakeCard(string title, string subtitle, string icon,
+    private static MenuCard MakeCard(string title, string icon,
                                      Color accent, int y)
     {
         return new MenuCard
         {
             Title = title,
-            Subtitle = subtitle,
             Icon = icon,
             Accent = accent,
             Location = new Point(32, y),
@@ -204,9 +191,6 @@ public class MainMenuForm : Form
 
         _alertsCard.Badge = hasAlerts ? count.ToString() : "";
         _alertsCard.Accent = hasAlerts ? Theme.Danger : Theme.Warning;
-        _alertsCard.Subtitle = hasAlerts
-            ? $"{count} released seat alert(s) need staff attention."
-            : "No pending alerts. You are all caught up.";
     }
 
     private void OpenAlertsScreen()

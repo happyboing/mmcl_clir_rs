@@ -151,7 +151,7 @@ public class SeatMapForm : Form
         toolbar.Controls.Add(new Label
         {
             Text = "Viewing",
-            Location = new Point(24, 14),
+            Location = new Point(20, 14),
             AutoSize = true,
             ForeColor = Theme.Muted,
             Font = Theme.Font(8.75f, FontStyle.Bold),
@@ -160,7 +160,7 @@ public class SeatMapForm : Form
 
         _dtpDate.Format = DateTimePickerFormat.Short;
         _dtpDate.Value = DateTime.Today;
-        _dtpDate.Location = new Point(82, 7);
+        _dtpDate.Location = new Point(100, 7);
         _dtpDate.Width = 130;
         _dtpDate.Font = Theme.Font(9.25f);
         _dtpDate.ValueChanged += (s, e) =>
@@ -174,7 +174,7 @@ public class SeatMapForm : Form
         toolbar.Controls.Add(new Label
         {
             Text = "at",
-            Location = new Point(222, 14),
+            Location = new Point(242, 14),
             AutoSize = true,
             ForeColor = Theme.Muted,
             Font = Theme.Font(8.75f, FontStyle.Bold),
@@ -184,7 +184,7 @@ public class SeatMapForm : Form
         _dtpTime.Format = DateTimePickerFormat.Custom;
         _dtpTime.CustomFormat = "HH:mm";
         _dtpTime.ShowUpDown = true;
-        _dtpTime.Location = new Point(246, 7);
+        _dtpTime.Location = new Point(266, 7);
         _dtpTime.Width = 82;
         _dtpTime.Font = Theme.Font(9.25f);
         _dtpTime.ValueChanged += (s, e) =>
@@ -196,7 +196,7 @@ public class SeatMapForm : Form
         toolbar.Controls.Add(_dtpTime);
 
         var btnNow = Theme.MakeButton("Now", AppButtonKind.Primary, 72, 34);
-        btnNow.Location = new Point(344, 5);
+        btnNow.Location = new Point(362, 5);
         btnNow.Click += (s, e) =>
         {
             _followingNow = true;
@@ -206,7 +206,7 @@ public class SeatMapForm : Form
         toolbar.Controls.Add(btnNow);
 
         var btnRefresh = Theme.MakeButton("Refresh", AppButtonKind.Secondary, 92, 34);
-        btnRefresh.Location = new Point(426, 5);
+        btnRefresh.Location = new Point(444, 5);
         btnRefresh.Click += (s, e) =>
         {
             if (_followingNow) SetPickersToNow();
@@ -214,7 +214,7 @@ public class SeatMapForm : Form
         };
         toolbar.Controls.Add(btnRefresh);
 
-        _lblClock.Location = new Point(540, 14);
+        _lblClock.Location = new Point(558, 14);
         _lblClock.AutoSize = true;
         _lblClock.Font = Theme.Font(9f, FontStyle.Bold);
         _lblClock.ForeColor = Theme.Muted;
