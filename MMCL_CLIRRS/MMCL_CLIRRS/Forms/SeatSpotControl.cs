@@ -5,19 +5,19 @@ namespace MMCL_CLIRRS;
 
 public sealed class SeatSpotControl : Control
 {
-    private static readonly Color AvailableFill = Color.FromArgb(232, 245, 233);
-    private static readonly Color AvailableLine = Color.FromArgb(46, 125, 50);
-    private static readonly Color AvailableText = Color.FromArgb(27, 94, 32);
+    private static readonly Color AvailableFill = Color.FromArgb(238, 247, 242);
+    private static readonly Color AvailableLine = Theme.Success;
+    private static readonly Color AvailableText = Color.FromArgb(30, 92, 69);
 
-    private static readonly Color ReservedFill = Color.FromArgb(255, 243, 224);
-    private static readonly Color ReservedLine = Color.FromArgb(239, 108, 0);
-    private static readonly Color ReservedText = Color.FromArgb(216, 67, 21);
+    private static readonly Color ReservedFill = Color.FromArgb(255, 246, 232);
+    private static readonly Color ReservedLine = Theme.Warning;
+    private static readonly Color ReservedText = Color.FromArgb(156, 88, 17);
 
-    private static readonly Color OccupiedFill = Color.FromArgb(255, 235, 238);
-    private static readonly Color OccupiedLine = Color.FromArgb(183, 28, 28);
-    private static readonly Color OccupiedText = Color.FromArgb(183, 28, 28);
+    private static readonly Color OccupiedFill = Color.FromArgb(252, 238, 240);
+    private static readonly Color OccupiedLine = Theme.Danger;
+    private static readonly Color OccupiedText = Theme.Danger;
 
-    private static readonly Color SelectedLine = Color.FromArgb(21, 101, 192);
+    private static readonly Color SelectedLine = Theme.Info;
 
     private bool _hoverSpot;
     private bool _hoverCancel;
@@ -155,8 +155,9 @@ public sealed class SeatSpotControl : Control
         if (IsSelected)
         {
             using var selectedPen = new Pen(SelectedLine, 2.5f);
-            e.Graphics.DrawRectangle(selectedPen,
-                new Rectangle(1, 1, Width - 3, Height - 3));
+            using GraphicsPath selectedPath = RoundedRect(
+                new Rectangle(1, 1, Width - 3, Height - 3), 6);
+            e.Graphics.DrawPath(selectedPen, selectedPath);
         }
     }
 
@@ -313,8 +314,8 @@ public sealed class SeatSpotControl : Control
         Rectangle bounds = CancelBounds;
         using GraphicsPath path = RoundedRect(bounds, 5);
         using var fillBrush = new SolidBrush(_hoverCancel
-            ? Color.FromArgb(142, 0, 0)
-            : Color.FromArgb(183, 28, 28));
+            ? Theme.PrimaryDark
+            : Theme.Danger);
 
         g.FillPath(fillBrush, path);
 

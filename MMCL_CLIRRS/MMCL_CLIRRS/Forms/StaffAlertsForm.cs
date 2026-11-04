@@ -2,68 +2,106 @@ namespace MMCL_CLIRRS;
 
 public class StaffAlertsForm : Form
 {
-    private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
-
     private readonly ReservationMonitorService _monitor;
-    private readonly ListBox _list = new ListBox();
-    private readonly Button _btnNext = new Button();
-    private readonly Button _btnAll = new Button();
+    private readonly ListView _list = new ListView();
+    private readonly AppButton _btnNext;
+    private readonly AppButton _btnAll;
+    private readonly Label _lblCount = new Label();
+    private readonly Label _lblHint = new Label();
 
     public StaffAlertsForm(ReservationMonitorService monitor)
     {
         _monitor = monitor;
 
         Text = "Staff Alerts";
-        Font = new Font("Segoe UI", 10);
-        BackColor = Color.White;
+        Theme.StyleForm(this);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(900, 440);
+        ClientSize = new Size(800, 610);
 
-        var header = new Label
+        Controls.Add(Theme.CreateHeader(
+            "Grace-period alerts",
+            "Seats released after the check-in window. Oldest alerts appear first.",
+            this));
+
+        var summary = new CardPanel
         {
-            Text = "Grace-period alerts (oldest first)",
-            Dock = DockStyle.Top,
-            Height = 44,
-            BackColor = Maroon,
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 12, FontStyle.Bold),
-            TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(12, 0, 0, 0)
+            Location = new Point(24, 106),
+            Size = new Size(752, 88),
+            BackColor = Theme.Surface,
+            BorderColor = Theme.Border
         };
+        Controls.Add(summary);
+
+        summary.Controls.Add(new Label
+        {
+            Text = "PENDING ALERTS",
+            Location = new Point(20, 17),
+            AutoSize = true,
+            Font = Theme.Font(8f, FontStyle.Bold),
+            ForeColor = Theme.Muted,
+            BackColor = Color.Transparent
+        });
+
+        _lblCount.Location = new Point(20, 34);
+        _lblCount.Size = new Size(70, 42);
+        _lblCount.Font = Theme.Font(24f, FontStyle.Bold);
+        _lblCount.ForeColor = Theme.Danger;
+        _lblCount.Text = "0";
+        summary.Controls.Add(_lblCount);
+
+        _lblHint.Location = new Point(94, 45);
+        _lblHint.Size = new Size(630, 24);
+        _lblHint.Font = Theme.Font(9.5f);
+        _lblHint.ForeColor = Theme.Muted;
+        _lblHint.Text = "You are all caught up.";
+        summary.Controls.Add(_lblHint);
+
+        var listCard = new CardPanel
+        {
+            Location = new Point(24, 210),
+            Size = new Size(752, 306),
+            BackColor = Theme.Surface,
+            BorderColor = Theme.Border,
+            Padding = new Padding(16, 14, 16, 16)
+        };
+        Controls.Add(listCard);
 
         _list.Dock = DockStyle.Fill;
+        _list.View = View.Details;
+        _list.FullRowSelect = true;
+        _list.MultiSelect = false;
+        _list.HideSelection = false;
+        _list.GridLines = false;
         _list.BorderStyle = BorderStyle.None;
-        _list.HorizontalScrollbar = true;
-        _list.IntegralHeight = false;
+        _list.BackColor = Theme.Surface;
+        _list.ForeColor = Theme.Ink;
+        _list.Font = Theme.Font(9.25f);
+        _list.Columns.Add("Time", 78);
+        _list.Columns.Add("Spot / Room", 138);
+        _list.Columns.Add("User", 190);
+        _list.Columns.Add("Reserved for", 142);
+        _list.Columns.Add("Note", 168);
+        listCard.Controls.Add(_list);
 
-        var footer = new Panel
-        {
-            Dock = DockStyle.Bottom,
-            Height = 58,
-            BackColor = Color.FromArgb(246, 247, 249)
-        };
+        _btnNext = Theme.MakeButton("Acknowledge next", AppButtonKind.Primary, 180, 40);
+        _btnAll = Theme.MakeButton("Acknowledge all", AppButtonKind.Secondary, 166, 40);
+        var btnClose = Theme.MakeButton("Close", AppButtonKind.Secondary, 118, 40);
 
-        StyleButton(_btnNext, "Acknowledge Next", Maroon, Color.White, 12);
-        StyleButton(_btnAll, "Acknowledge All", Color.White, Maroon, 190);
-        var btnClose = new Button();
-        StyleButton(btnClose, "Close", Color.White, Maroon, 728);
-        btnClose.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _btnNext.Location = new Point(24, 536);
+        _btnAll.Location = new Point(216, 536);
+        btnClose.Location = new Point(658, 536);
 
         _btnNext.Click += (s, e) => _monitor.AcknowledgeNext();
         _btnAll.Click += (s, e) => _monitor.AcknowledgeAll();
         btnClose.Click += (s, e) => Close();
         CancelButton = btnClose;
 
-        footer.Controls.Add(_btnNext);
-        footer.Controls.Add(_btnAll);
-        footer.Controls.Add(btnClose);
-
-        Controls.Add(_list);
-        Controls.Add(footer);
-        Controls.Add(header);
+        Controls.Add(_btnNext);
+        Controls.Add(_btnAll);
+        Controls.Add(btnClose);
 
         _monitor.AlertsChanged += Reload;
         FormClosed += (s, e) => _monitor.AlertsChanged -= Reload;
@@ -80,30 +118,37 @@ public class StaffAlertsForm : Form
 
         if (pending.Count == 0)
         {
-            _list.Items.Add("No pending alerts.");
+            var empty = new ListViewItem("No pending alerts");
+            empty.SubItems.Add("—");
+            empty.SubItems.Add("—");
+            empty.SubItems.Add("—");
+            empty.SubItems.Add("Everything is up to date");
+            empty.ForeColor = Theme.Muted;
+            _list.Items.Add(empty);
         }
         else
         {
             foreach (StaffNotification alert in pending)
-                _list.Items.Add(alert);
+            {
+                var row = new ListViewItem(alert.RaisedAt.ToString("HH:mm:ss"));
+                row.SubItems.Add(alert.SpotOrRoom);
+                row.SubItems.Add($"{alert.UserName} ({alert.UserIdNumber})");
+                row.SubItems.Add(alert.ReservedFor.ToString("dd MMM HH:mm"));
+                row.SubItems.Add("Released after grace period");
+                row.Tag = alert;
+                _list.Items.Add(row);
+            }
         }
 
         _list.EndUpdate();
 
+        _lblCount.Text = pending.Count.ToString();
+        _lblCount.ForeColor = pending.Count > 0 ? Theme.Danger : Theme.Success;
+        _lblHint.Text = pending.Count > 0
+            ? "Acknowledge alerts after the front desk has followed up."
+            : "You are all caught up. New alerts will appear here automatically.";
+
         _btnNext.Enabled = pending.Count > 0;
         _btnAll.Enabled = pending.Count > 0;
-    }
-
-    private static void StyleButton(Button button, string text, Color back, Color fore, int x)
-    {
-        button.Text = text;
-        button.Location = new Point(x, 10);
-        button.Size = new Size(160, 38);
-        button.BackColor = back;
-        button.ForeColor = fore;
-        button.FlatStyle = FlatStyle.Flat;
-        button.Cursor = Cursors.Hand;
-        button.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-        button.FlatAppearance.BorderColor = Maroon;
     }
 }

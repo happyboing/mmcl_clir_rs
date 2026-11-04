@@ -4,10 +4,6 @@ namespace MMCL_CLIRRS;
 
 public class SeatMapForm : Form
 {
-    private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
-    private static readonly Color PageBackground = Color.FromArgb(246, 247, 249);
-    private static readonly Color Ink = Color.FromArgb(38, 50, 56);
-
     private readonly ReservationManagementService _management;
     private readonly ReservationMonitorService? _monitor;
     private readonly SeatMapService _service;
@@ -23,7 +19,7 @@ public class SeatMapForm : Form
     private readonly Label _lblClock = new Label();
 
     private readonly Label _lblSpotName = new Label();
-    private readonly Label _lblStatus = new Label();
+    private readonly PillLabel _lblStatus = new PillLabel();
     private readonly Label _lblType = new Label();
     private readonly Label _lblTable = new Label();
     private readonly Label _lblArea = new Label();
@@ -32,8 +28,8 @@ public class SeatMapForm : Form
     private readonly Label _lblReservedBy = new Label();
     private readonly Label _lblSchedule = new Label();
     private readonly ListBox _lstSchedule = new ListBox();
-    private readonly Button _btnReserveSpot = new Button();
-    private readonly Button _btnCancelSpot = new Button();
+    private readonly AppButton _btnReserveSpot = new AppButton();
+    private readonly AppButton _btnCancelSpot = new AppButton();
 
     private readonly System.Windows.Forms.Timer _refreshTimer = new();
     private readonly ToolTip _toolTip = new();
@@ -51,12 +47,12 @@ public class SeatMapForm : Form
 
         Text = "CLIR Interactive Seat Map";
         Font = new Font("Segoe UI", 10);
-        BackColor = PageBackground;
+        BackColor = Theme.Background;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(1300, 680);
+        ClientSize = new Size(1320, 690);
 
         BuildHeader();
         BuildToolbar();
@@ -105,55 +101,19 @@ public class SeatMapForm : Form
 
     private void BuildHeader()
     {
-        var header = new Panel
-        {
-            Location = new Point(0, 0),
-            Size = new Size(ClientSize.Width, 60),
-            BackColor = Maroon,
-            Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-
-        header.Controls.Add(new Label
-        {
-            Text = "CLIR Interactive Seat Map",
-            Location = new Point(18, 5),
-            AutoSize = true,
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 16, FontStyle.Bold)
-        });
-
-        header.Controls.Add(new Label
-        {
-            Text = "Tap a chair or discussion room to see its details. A reserved spot can be cancelled right here.",
-            Location = new Point(20, 34),
-            AutoSize = true,
-            ForeColor = Color.FromArgb(255, 235, 235),
-            Font = new Font("Segoe UI", 9)
-        });
-
-        var btnHome = new Button
-        {
-            Text = "← Back to Home",
-            Location = new Point(ClientSize.Width - 156, 14),
-            Size = new Size(140, 32),
-            BackColor = Color.White,
-            ForeColor = Maroon,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Font = new Font("Segoe UI", 9, FontStyle.Bold),
-            Anchor = AnchorStyles.Top | AnchorStyles.Right
-        };
-        btnHome.FlatAppearance.BorderSize = 0;
-        btnHome.Click += (s, e) => Close();
-        header.Controls.Add(btnHome);
+        var header = Theme.CreateHeader(
+            "CLIR interactive seat map",
+            "Tap a chair or discussion room to see its details. Reserved spots can be cancelled here.",
+            this, "Back to home", height: 68);
 
         _lblAlerts.AutoSize = false;
-        _lblAlerts.Location = new Point(ClientSize.Width - 520, 18);
-        _lblAlerts.Size = new Size(350, 24);
+        _lblAlerts.Location = new Point(header.Width - 540, 22);
+        _lblAlerts.Size = new Size(390, 24);
         _lblAlerts.TextAlign = ContentAlignment.MiddleRight;
-        _lblAlerts.ForeColor = Color.White;
-        _lblAlerts.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+        _lblAlerts.ForeColor = Color.FromArgb(232, 210, 214);
+        _lblAlerts.Font = Theme.Font(8.75f, FontStyle.Bold);
         _lblAlerts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        _lblAlerts.BackColor = Color.Transparent;
         header.Controls.Add(_lblAlerts);
 
         Controls.Add(header);
@@ -173,30 +133,36 @@ public class SeatMapForm : Form
         _lblAlerts.Text = count == 0
             ? ""
             : $"⚠ {count} unoccupied seat alert(s) – staff notified";
+        _lblAlerts.ForeColor = count == 0
+            ? Color.FromArgb(232, 210, 214)
+            : Theme.Gold;
     }
 
     private void BuildToolbar()
     {
         var toolbar = new Panel
         {
-            Location = new Point(0, 60),
-            Size = new Size(ClientSize.Width, 40),
-            BackColor = Color.White,
+            Location = new Point(0, 68),
+            Size = new Size(ClientSize.Width, 44),
+            BackColor = Theme.Surface,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         };
 
         toolbar.Controls.Add(new Label
         {
             Text = "Viewing",
-            Location = new Point(18, 13),
+            Location = new Point(24, 14),
             AutoSize = true,
-            ForeColor = Ink
+            ForeColor = Theme.Muted,
+            Font = Theme.Font(8.75f, FontStyle.Bold),
+            BackColor = Color.Transparent
         });
 
         _dtpDate.Format = DateTimePickerFormat.Short;
         _dtpDate.Value = DateTime.Today;
-        _dtpDate.Location = new Point(76, 8);
+        _dtpDate.Location = new Point(82, 7);
         _dtpDate.Width = 130;
+        _dtpDate.Font = Theme.Font(9.25f);
         _dtpDate.ValueChanged += (s, e) =>
         {
             if (_updatingPickers) return;
@@ -208,16 +174,19 @@ public class SeatMapForm : Form
         toolbar.Controls.Add(new Label
         {
             Text = "at",
-            Location = new Point(216, 13),
+            Location = new Point(222, 14),
             AutoSize = true,
-            ForeColor = Ink
+            ForeColor = Theme.Muted,
+            Font = Theme.Font(8.75f, FontStyle.Bold),
+            BackColor = Color.Transparent
         });
 
         _dtpTime.Format = DateTimePickerFormat.Custom;
         _dtpTime.CustomFormat = "HH:mm";
         _dtpTime.ShowUpDown = true;
-        _dtpTime.Location = new Point(238, 8);
+        _dtpTime.Location = new Point(246, 7);
         _dtpTime.Width = 82;
+        _dtpTime.Font = Theme.Font(9.25f);
         _dtpTime.ValueChanged += (s, e) =>
         {
             if (_updatingPickers) return;
@@ -226,7 +195,8 @@ public class SeatMapForm : Form
         };
         toolbar.Controls.Add(_dtpTime);
 
-        Button btnNow = MakeToolbarButton("Now", 332, 76);
+        var btnNow = Theme.MakeButton("Now", AppButtonKind.Primary, 72, 34);
+        btnNow.Location = new Point(344, 5);
         btnNow.Click += (s, e) =>
         {
             _followingNow = true;
@@ -235,7 +205,8 @@ public class SeatMapForm : Form
         };
         toolbar.Controls.Add(btnNow);
 
-        Button btnRefresh = MakeToolbarButton("Refresh", 416, 86);
+        var btnRefresh = Theme.MakeButton("Refresh", AppButtonKind.Secondary, 92, 34);
+        btnRefresh.Location = new Point(426, 5);
         btnRefresh.Click += (s, e) =>
         {
             if (_followingNow) SetPickersToNow();
@@ -243,29 +214,30 @@ public class SeatMapForm : Form
         };
         toolbar.Controls.Add(btnRefresh);
 
-        _lblClock.Location = new Point(520, 13);
+        _lblClock.Location = new Point(540, 14);
         _lblClock.AutoSize = true;
-        _lblClock.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-        _lblClock.ForeColor = Color.DimGray;
+        _lblClock.Font = Theme.Font(9f, FontStyle.Bold);
+        _lblClock.ForeColor = Theme.Muted;
+        _lblClock.BackColor = Color.Transparent;
         toolbar.Controls.Add(_lblClock);
 
         Controls.Add(toolbar);
 
         Controls.Add(new Panel
         {
-            Location = new Point(0, 100),
+            Location = new Point(0, 112),
             Size = new Size(ClientSize.Width, 1),
-            BackColor = Color.FromArgb(224, 224, 224),
+            BackColor = Theme.Border,
             Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
         });
     }
 
     private void BuildMap()
     {
-        _mapPanel.Location = new Point(16, 108);
+        _mapPanel.Location = new Point(24, 118);
         _mapPanel.Size = new Size(ClirMapLayout.MapWidth, ClirMapLayout.MapHeight);
-        _mapPanel.BackColor = Color.FromArgb(248, 249, 250);
-        _mapPanel.BorderStyle = BorderStyle.FixedSingle;
+        _mapPanel.BackColor = Color.FromArgb(252, 250, 248);
+        _mapPanel.BorderStyle = BorderStyle.None;
         _mapPanel.Paint += MapPanel_Paint;
         Controls.Add(_mapPanel);
 
@@ -294,87 +266,81 @@ public class SeatMapForm : Form
 
     private void BuildDetailsPanel()
     {
-        var panel = new Panel
+        var panel = new CardPanel
         {
-            Location = new Point(932, 108),
-            Size = new Size(352, ClirMapLayout.MapHeight),
-            BackColor = Color.White,
-            BorderStyle = BorderStyle.FixedSingle
+            Location = new Point(940, 118),
+            Size = new Size(356, ClirMapLayout.MapHeight),
+            BackColor = Theme.Surface,
+            BorderColor = Theme.Border,
+            Padding = new Padding(18)
         };
 
         panel.Controls.Add(new Label
         {
-            Text = "Selected spot",
-            Location = new Point(12, 10),
+            Text = "SELECTED SPOT",
+            Location = new Point(18, 16),
             AutoSize = true,
-            ForeColor = Maroon,
-            Font = new Font("Segoe UI", 11, FontStyle.Bold)
+            ForeColor = Theme.Muted,
+            Font = Theme.Font(8f, FontStyle.Bold),
+            BackColor = Color.Transparent
         });
 
-        _lblSpotName.Location = new Point(12, 36);
-        _lblSpotName.Size = new Size(326, 26);
-        _lblSpotName.Font = new Font("Segoe UI", 13, FontStyle.Bold);
-        _lblSpotName.ForeColor = Ink;
+        _lblSpotName.Location = new Point(18, 38);
+        _lblSpotName.Size = new Size(320, 32);
+        _lblSpotName.Font = Theme.Font(14f, FontStyle.Bold);
+        _lblSpotName.ForeColor = Theme.Ink;
+        _lblSpotName.BackColor = Color.Transparent;
         panel.Controls.Add(_lblSpotName);
 
-        _lblStatus.Location = new Point(12, 68);
-        _lblStatus.Size = new Size(120, 24);
-        _lblStatus.TextAlign = ContentAlignment.MiddleCenter;
-        _lblStatus.Font = new Font("Segoe UI", 9, FontStyle.Bold);
-        _lblStatus.ForeColor = Color.White;
-        _lblStatus.BackColor = Color.Gray;
+        _lblStatus.Location = new Point(18, 76);
+        _lblStatus.Size = new Size(118, 26);
+        _lblStatus.Text = "—";
+        _lblStatus.FillColor = Theme.Muted;
         panel.Controls.Add(_lblStatus);
 
-        AddField(panel, _lblType, 104);
-        AddField(panel, _lblTable, 128);
-        AddField(panel, _lblArea, 152);
-        AddField(panel, _lblSeat, 176);
+        AddField(panel, _lblType, 116);
+        AddField(panel, _lblTable, 142);
+        AddField(panel, _lblArea, 168);
+        AddField(panel, _lblSeat, 194);
 
         panel.Controls.Add(new Panel
         {
-            Location = new Point(12, 204),
-            Size = new Size(326, 1),
-            BackColor = Color.FromArgb(224, 224, 224)
+            Location = new Point(18, 226),
+            Size = new Size(320, 1),
+            BackColor = Theme.Border
         });
 
-        _lblCurrent.Location = new Point(12, 214);
-        _lblCurrent.Size = new Size(326, 20);
-        _lblCurrent.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-        _lblCurrent.ForeColor = Ink;
+        _lblCurrent.Location = new Point(18, 238);
+        _lblCurrent.Size = new Size(320, 22);
+        _lblCurrent.Font = Theme.Font(10.5f, FontStyle.Bold);
+        _lblCurrent.ForeColor = Theme.Ink;
+        _lblCurrent.BackColor = Color.Transparent;
         panel.Controls.Add(_lblCurrent);
 
-        _lblReservedBy.Location = new Point(12, 238);
-        _lblReservedBy.Size = new Size(326, 20);
-        _lblReservedBy.ForeColor = Color.DimGray;
+        _lblReservedBy.Location = new Point(18, 264);
+        _lblReservedBy.Size = new Size(320, 20);
+        _lblReservedBy.ForeColor = Theme.Muted;
+        _lblReservedBy.BackColor = Color.Transparent;
         panel.Controls.Add(_lblReservedBy);
 
-        _lblSchedule.Location = new Point(12, 262);
-        _lblSchedule.Size = new Size(326, 38);
-        _lblSchedule.ForeColor = Color.DimGray;
+        _lblSchedule.Location = new Point(18, 288);
+        _lblSchedule.Size = new Size(320, 38);
+        _lblSchedule.ForeColor = Theme.Muted;
+        _lblSchedule.BackColor = Color.Transparent;
         panel.Controls.Add(_lblSchedule);
 
-        _btnReserveSpot.Text = "Reserve This Spot";
-        _btnReserveSpot.Location = new Point(12, 306);
-        _btnReserveSpot.Size = new Size(326, 36);
-        _btnReserveSpot.BackColor = Color.SeaGreen;
-        _btnReserveSpot.ForeColor = Color.White;
-        _btnReserveSpot.FlatStyle = FlatStyle.Flat;
-        _btnReserveSpot.Cursor = Cursors.Hand;
-        _btnReserveSpot.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-        _btnReserveSpot.FlatAppearance.BorderColor = Color.SeaGreen;
+        _btnReserveSpot.Text = "Reserve this spot";
+        _btnReserveSpot.Kind = AppButtonKind.Success;
+        _btnReserveSpot.Location = new Point(18, 332);
+        _btnReserveSpot.Size = new Size(320, 42);
         _btnReserveSpot.Visible = false;
         _btnReserveSpot.Click += BtnReserveSpot_Click;
         panel.Controls.Add(_btnReserveSpot);
 
-        _btnCancelSpot.Text = "Cancel My Reservation";
-        _btnCancelSpot.Location = new Point(12, 306);
-        _btnCancelSpot.Size = new Size(326, 36);
-        _btnCancelSpot.BackColor = Maroon;
-        _btnCancelSpot.ForeColor = Color.White;
-        _btnCancelSpot.FlatStyle = FlatStyle.Flat;
-        _btnCancelSpot.Cursor = Cursors.Hand;
-        _btnCancelSpot.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-        _btnCancelSpot.FlatAppearance.BorderColor = Maroon;
+        _btnCancelSpot.Text = "Cancel my reservation";
+        _btnCancelSpot.Kind = AppButtonKind.Danger;
+        _btnCancelSpot.Location = new Point(18, 332);
+        _btnCancelSpot.Size = new Size(320, 42);
         _btnCancelSpot.Visible = false;
         _btnCancelSpot.Click += BtnCancelSpot_Click;
         panel.Controls.Add(_btnCancelSpot);
@@ -382,32 +348,44 @@ public class SeatMapForm : Form
         panel.Controls.Add(new Label
         {
             Text = "Reservations on this date",
-            Location = new Point(12, 352),
+            Location = new Point(18, 390),
             AutoSize = true,
-            ForeColor = Ink,
-            Font = new Font("Segoe UI", 9, FontStyle.Bold)
+            ForeColor = Theme.Ink,
+            Font = Theme.Font(9f, FontStyle.Bold),
+            BackColor = Color.Transparent
         });
 
-        _lstSchedule.Location = new Point(12, 374);
-        _lstSchedule.Size = new Size(326, 90);
-        _lstSchedule.Font = new Font("Segoe UI", 9);
-        _lstSchedule.BorderStyle = BorderStyle.FixedSingle;
+        var scheduleHost = new CardPanel
+        {
+            Location = new Point(18, 412),
+            Size = new Size(320, 92),
+            BackColor = Theme.SurfaceAlt,
+            BorderColor = Theme.Border,
+            Radius = 9,
+            Padding = new Padding(9, 7, 9, 7)
+        };
+        _lstSchedule.Dock = DockStyle.Fill;
+        _lstSchedule.Font = Theme.Font(8.75f);
+        _lstSchedule.BorderStyle = BorderStyle.None;
+        _lstSchedule.BackColor = Theme.SurfaceAlt;
+        _lstSchedule.ForeColor = Theme.Ink;
         _lstSchedule.HorizontalScrollbar = true;
         _lstSchedule.IntegralHeight = false;
-        panel.Controls.Add(_lstSchedule);
+        scheduleHost.Controls.Add(_lstSchedule);
+        panel.Controls.Add(scheduleHost);
 
-        AddLegend(panel, 12, 474, Color.FromArgb(46, 125, 50), "Available");
-        AddLegend(panel, 112, 474, Color.FromArgb(239, 108, 0), "Reserved");
-        AddLegend(panel, 212, 474, Color.FromArgb(183, 28, 28), "Occupied");
+        AddLegend(panel, 18, 520, Theme.Success, "Available");
+        AddLegend(panel, 122, 520, Theme.Warning, "Reserved");
+        AddLegend(panel, 226, 520, Theme.Danger, "Occupied");
 
         panel.Controls.Add(new Label
         {
-            Text = "Select a spot on the map. Available spots can be reserved here, " +
-                   "and reserved spots can be cancelled from this panel.",
-            Location = new Point(12, 500),
-            Size = new Size(326, 46),
-            ForeColor = Color.DimGray,
-            Font = new Font("Segoe UI", 8.5f)
+            Text = "Select a spot to reserve it, or cancel a reserved spot.",
+            Location = new Point(18, 536),
+            Size = new Size(320, 16),
+            ForeColor = Theme.Muted,
+            Font = Theme.Font(8.25f),
+            BackColor = Color.Transparent
         });
 
         Controls.Add(panel);
@@ -415,10 +393,11 @@ public class SeatMapForm : Form
 
     private static void AddField(Panel panel, Label label, int y)
     {
-        label.Location = new Point(12, y);
+        label.Location = new Point(18, y);
         label.AutoSize = true;
-        label.ForeColor = Color.FromArgb(55, 71, 79);
-        label.Font = new Font("Segoe UI", 9.5f);
+        label.ForeColor = Theme.Ink;
+        label.Font = Theme.Font(9.25f);
+        label.BackColor = Color.Transparent;
         panel.Controls.Add(label);
     }
 
@@ -426,36 +405,20 @@ public class SeatMapForm : Form
     {
         panel.Controls.Add(new Panel
         {
-            Location = new Point(x, y + 2),
-            Size = new Size(14, 14),
+            Location = new Point(x, y + 3),
+            Size = new Size(12, 12),
             BackColor = color
         });
 
         panel.Controls.Add(new Label
         {
             Text = text,
-            Location = new Point(x + 20, y),
+            Location = new Point(x + 18, y),
             AutoSize = true,
-            ForeColor = Color.DimGray,
-            Font = new Font("Segoe UI", 8.5f)
+            ForeColor = Theme.Muted,
+            Font = Theme.Font(8.25f),
+            BackColor = Color.Transparent
         });
-    }
-
-    private static Button MakeToolbarButton(string text, int x, int width)
-    {
-        var button = new Button
-        {
-            Text = text,
-            Location = new Point(x, 6),
-            Size = new Size(width, 30),
-            BackColor = Color.White,
-            ForeColor = Maroon,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Font = new Font("Segoe UI", 9, FontStyle.Bold)
-        };
-        button.FlatAppearance.BorderColor = Maroon;
-        return button;
     }
 
     private void MapPanel_Paint(object? sender, PaintEventArgs e)
@@ -477,10 +440,10 @@ public class SeatMapForm : Form
 
         using var tinyFont = new Font("Segoe UI", 6.4f, FontStyle.Bold);
         using var boldFont = new Font("Segoe UI", 8f, FontStyle.Bold);
-        using var furnitureBrush = new SolidBrush(Color.FromArgb(224, 224, 224));
-        using var furniturePen = new Pen(Color.FromArgb(90, 90, 90), 2f);
-        using var tableBrush = new SolidBrush(Color.FromArgb(236, 239, 241));
-        using var tablePen = new Pen(Color.FromArgb(96, 125, 139), 2f);
+        using var furnitureBrush = new SolidBrush(Color.FromArgb(236, 231, 226));
+        using var furniturePen = new Pen(Color.FromArgb(165, 154, 148), 2f);
+        using var tableBrush = new SolidBrush(Color.FromArgb(247, 242, 237));
+        using var tablePen = new Pen(Color.FromArgb(172, 155, 149), 2f);
         using var centerFormat = new StringFormat
         {
             Alignment = StringAlignment.Center,
@@ -515,8 +478,8 @@ public class SeatMapForm : Form
 
         using (GraphicsPath wingPath = RoundedRect(new Rectangle(770, 180, 112, 220), 8))
         {
-            using var roomFill = new SolidBrush(Color.FromArgb(245, 245, 245));
-            using var roomPen = new Pen(Color.FromArgb(90, 90, 90), 2.5f);
+            using var roomFill = new SolidBrush(Color.FromArgb(250, 246, 242));
+            using var roomPen = new Pen(Color.FromArgb(172, 155, 149), 2.5f);
             g.FillPath(roomFill, wingPath);
             g.DrawPath(roomPen, wingPath);
         }
@@ -527,11 +490,11 @@ public class SeatMapForm : Form
 
     private static void DrawMonitorTable(Graphics g)
     {
-        using var fill = new SolidBrush(Color.FromArgb(224, 224, 224));
-        using var line = new Pen(Color.FromArgb(80, 80, 80), 2f);
-        using var monitorBrush = new SolidBrush(Color.FromArgb(60, 60, 60));
+        using var fill = new SolidBrush(Color.FromArgb(236, 231, 226));
+        using var line = new Pen(Color.FromArgb(165, 154, 148), 2f);
+        using var monitorBrush = new SolidBrush(Color.FromArgb(75, 68, 71));
         using var labelFont = new Font("Segoe UI", 7.5f, FontStyle.Bold);
-        using var labelBrush = new SolidBrush(Color.FromArgb(120, 120, 120));
+        using var labelBrush = new SolidBrush(Theme.Muted);
 
         var table = new Rectangle(20, 70, 180, 40);
         using GraphicsPath tablePath = RoundedRect(table, 6);
@@ -640,7 +603,7 @@ public class SeatMapForm : Form
         {
             _lblSpotName.Text = "Tap a spot on the map";
             _lblStatus.Text = "—";
-            _lblStatus.BackColor = Color.Gray;
+            _lblStatus.FillColor = Theme.Muted;
             _lblType.Text = "Type: —";
             _lblTable.Text = "Table: —";
             _lblArea.Text = "Area: —";
@@ -674,7 +637,7 @@ public class SeatMapForm : Form
         {
             case SpotAvailability.Reserved:
                 _lblStatus.Text = "RESERVED";
-                _lblStatus.BackColor = Color.FromArgb(239, 108, 0);
+                _lblStatus.FillColor = Theme.Warning;
                 _lblCurrent.Text = "Reserved at this time";
                 _lblReservedBy.Text = snapshot.Reservation == null
                     ? ""
@@ -689,7 +652,7 @@ public class SeatMapForm : Form
 
             case SpotAvailability.Occupied:
                 _lblStatus.Text = "OCCUPIED";
-                _lblStatus.BackColor = Color.FromArgb(183, 28, 28);
+                _lblStatus.FillColor = Theme.Danger;
                 _lblCurrent.Text = "In use at this time";
                 _lblReservedBy.Text = snapshot.Reservation == null
                     ? ""
@@ -704,7 +667,7 @@ public class SeatMapForm : Form
 
             default:
                 _lblStatus.Text = "AVAILABLE";
-                _lblStatus.BackColor = Color.FromArgb(46, 125, 50);
+                _lblStatus.FillColor = Theme.Success;
                 _lblCurrent.Text = "Available at this time";
                 _lblReservedBy.Text = "No reservation is holding this spot.";
                 _lblSchedule.Text = "";
