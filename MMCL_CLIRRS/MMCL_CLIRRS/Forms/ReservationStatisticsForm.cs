@@ -152,7 +152,7 @@ public class ReservationStatisticsForm : Form
         };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 112));
+        layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 126));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
 
         var cards = new FlowLayoutPanel
@@ -190,7 +190,7 @@ public class ReservationStatisticsForm : Form
     {
         var card = new CardPanel
         {
-            Size = new Size(178, 92),
+            Size = new Size(178, 106),
             BackColor = Theme.Surface,
             BorderColor = Theme.Border,
             Margin = new Padding(0, 0, 14, 0),
@@ -207,9 +207,9 @@ public class ReservationStatisticsForm : Form
         card.Controls.Add(new Label
         {
             Text = value.ToString(),
-            Location = new Point(16, 24),
+            Location = new Point(16, 22),
             AutoSize = true,
-            Font = Theme.Font(24f, FontStyle.Bold),
+            Font = Theme.Font(23f, FontStyle.Bold),
             ForeColor = accent,
             BackColor = Color.Transparent
         });
@@ -217,7 +217,7 @@ public class ReservationStatisticsForm : Form
         card.Controls.Add(new Label
         {
             Text = title,
-            Location = new Point(18, 66),
+            Location = new Point(18, 76),
             AutoSize = true,
             Font = Theme.Font(8.75f),
             ForeColor = Theme.Muted,
