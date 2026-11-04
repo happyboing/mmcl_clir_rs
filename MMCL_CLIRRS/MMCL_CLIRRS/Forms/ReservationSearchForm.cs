@@ -58,6 +58,7 @@ public class ReservationSearchForm : Form
         content.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         content.RowStyles.Add(new RowStyle(SizeType.Absolute, 58));
         Controls.Add(content);
+        content.BringToFront();
 
         content.Controls.Add(BuildSearchCard(), 0, 0);
         content.Controls.Add(BuildGridCard(), 0, 2);

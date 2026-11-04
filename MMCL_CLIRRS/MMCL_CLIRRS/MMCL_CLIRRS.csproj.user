@@ -13,11 +13,35 @@
     <Compile Update="Forms\MakeReservationForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\PieSpotControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Forms\ReservationSearchForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Forms\ReservationStatisticsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\ReserveSpotDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\SeatMapForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\SeatSpotControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Update="Forms\StaffAlertsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Forms\StatBarChart.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Update="Forms\UpdateReservationDialog.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="UI\ModernTabControl.cs">
+      <SubType>Component</SubType>
     </Compile>
   </ItemGroup>
 </Project>

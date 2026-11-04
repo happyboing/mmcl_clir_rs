@@ -55,6 +55,7 @@ public class ReservationStatisticsForm : Form
         layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 14));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         Controls.Add(layout);
+        layout.BringToFront();
 
         _lblSummary.AutoSize = true;
         _lblSummary.Font = Theme.Font(9.25f, FontStyle.Bold);
