@@ -135,7 +135,7 @@ public class MainMenuForm : Form
         panel.Controls.Add(new Label
         {
             Text = "Reservation desk",
-            Location = new Point(32, 34),
+            Location = new Point(32, 30),
             AutoSize = true,
             Font = Theme.Font(22f, FontStyle.Bold),
             ForeColor = Theme.Ink,
@@ -145,7 +145,7 @@ public class MainMenuForm : Form
         panel.Controls.Add(new Label
         {
             Text = "Choose an action to get started.",
-            Location = new Point(34, 76),
+            Location = new Point(34, 88),
             AutoSize = true,
             Font = Theme.Font(10f),
             ForeColor = Theme.Muted,
@@ -155,7 +155,7 @@ public class MainMenuForm : Form
         panel.Controls.Add(new Label
         {
             Text = "STUDENT & STAFF TOOLS",
-            Location = new Point(34, 116),
+            Location = new Point(34, 120),
             AutoSize = true,
             Font = Theme.Font(8f, FontStyle.Bold),
             ForeColor = Theme.Muted,
