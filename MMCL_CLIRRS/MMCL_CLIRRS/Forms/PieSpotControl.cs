@@ -2,23 +2,21 @@ using System.Drawing.Drawing2D;
 
 namespace MMCL_CLIRRS;
 
-// The eight pie-cut seats are one round shape, so they are drawn by one
-// control that works out which slice was clicked.
 public sealed class PieSpotControl : Control
 {
-    private static readonly Color AvailableFill = Color.FromArgb(232, 245, 233);
-    private static readonly Color AvailableLine = Color.FromArgb(46, 125, 50);
-    private static readonly Color AvailableText = Color.FromArgb(27, 94, 32);
+    private static readonly Color AvailableFill = Color.FromArgb(238, 247, 242);
+    private static readonly Color AvailableLine = Theme.Success;
+    private static readonly Color AvailableText = Color.FromArgb(30, 92, 69);
 
-    private static readonly Color ReservedFill = Color.FromArgb(255, 243, 224);
-    private static readonly Color ReservedLine = Color.FromArgb(239, 108, 0);
-    private static readonly Color ReservedText = Color.FromArgb(216, 67, 21);
+    private static readonly Color ReservedFill = Color.FromArgb(255, 246, 232);
+    private static readonly Color ReservedLine = Theme.Warning;
+    private static readonly Color ReservedText = Color.FromArgb(156, 88, 17);
 
-    private static readonly Color OccupiedFill = Color.FromArgb(255, 235, 238);
-    private static readonly Color OccupiedLine = Color.FromArgb(183, 28, 28);
-    private static readonly Color OccupiedText = Color.FromArgb(183, 28, 28);
+    private static readonly Color OccupiedFill = Color.FromArgb(252, 238, 240);
+    private static readonly Color OccupiedLine = Theme.Danger;
+    private static readonly Color OccupiedText = Theme.Danger;
 
-    private static readonly Color SelectedLine = Color.FromArgb(21, 101, 192);
+    private static readonly Color SelectedLine = Theme.Info;
 
     private const float Radius = 36f;
     private const float PieAreaHeight = 76f;
@@ -107,7 +105,6 @@ public sealed class PieSpotControl : Control
             g.FillPath(fillBrush, path);
             g.DrawPath(linePen, path);
 
-            // Seat number in the middle of the slice.
             double middleAngle = (startAngle + SliceAngle / 2f) * Math.PI / 180.0;
             float labelX = center.X + (float)(21 * Math.Cos(middleAngle));
             float labelY = center.Y + (float)(21 * Math.Sin(middleAngle));
@@ -123,7 +120,6 @@ public sealed class PieSpotControl : Control
                 new RectangleF(labelX - 9, labelY - 8, 18, 16), format);
         }
 
-        // A small centre dot makes the pie shape clearer.
         using var dotBrush = new SolidBrush(Color.FromArgb(96, 125, 139));
         g.FillEllipse(dotBrush, center.X - 3, center.Y - 3, 6, 6);
 
@@ -132,8 +128,8 @@ public sealed class PieSpotControl : Control
             Rectangle bounds = CancelBounds;
             using GraphicsPath buttonPath = RoundedRect(bounds, 5);
             using var fillBrush = new SolidBrush(_hoverIndex == -2
-                ? Color.FromArgb(142, 0, 0)
-                : Color.FromArgb(183, 28, 28));
+                ? Theme.PrimaryDark
+                : Theme.Danger);
 
             g.FillPath(fillBrush, buttonPath);
 

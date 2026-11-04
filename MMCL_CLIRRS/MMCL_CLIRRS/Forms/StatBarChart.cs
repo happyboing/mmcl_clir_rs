@@ -1,19 +1,28 @@
+using System.Drawing.Drawing2D;
+
 namespace MMCL_CLIRRS;
 
-// Small horizontal bar chart used by the statistics dashboard.
 public sealed class StatBarChart : Control
 {
-    private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
-    private static readonly Color BarColor = Color.FromArgb(211, 47, 47);
+    private static readonly Color[] BarColors =
+    {
+        Theme.Primary,
+        Theme.Success,
+        Theme.Info,
+        Theme.Gold,
+        Theme.Danger,
+        Theme.Warning
+    };
 
     private string _title = "";
     private IReadOnlyList<CountItem> _data = Array.Empty<CountItem>();
 
     public StatBarChart()
     {
-        BackColor = Color.White;
+        BackColor = Theme.Surface;
         SetStyle(ControlStyles.AllPaintingInWmPaint |
                  ControlStyles.OptimizedDoubleBuffer |
+                 ControlStyles.ResizeRedraw |
                  ControlStyles.UserPaint, true);
     }
 
@@ -29,35 +38,52 @@ public sealed class StatBarChart : Control
         base.OnPaint(e);
 
         Graphics g = e.Graphics;
-        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+        g.SmoothingMode = SmoothingMode.AntiAlias;
+        g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-        using var border = new Pen(Color.FromArgb(224, 224, 224), 1f);
-        g.DrawRectangle(border, 0, 0, Width - 1, Height - 1);
+        using var background = new SolidBrush(Theme.Surface);
+        g.FillRectangle(background, ClientRectangle);
 
-        using var titleFont = new Font("Segoe UI", 10.5f, FontStyle.Bold);
-        using var labelFont = new Font("Segoe UI", 8.5f);
-        using var valueFont = new Font("Segoe UI", 8.5f, FontStyle.Bold);
-        using var titleBrush = new SolidBrush(Maroon);
-        using var labelBrush = new SolidBrush(Color.FromArgb(55, 71, 79));
-        using var valueBrush = new SolidBrush(Color.FromArgb(55, 71, 79));
-        using var barBrush = new SolidBrush(BarColor);
-        using var emptyBrush = new SolidBrush(Color.FromArgb(238, 238, 238));
+        using GraphicsPath card = Theme.RoundedRect(
+            new Rectangle(0, 0, Width - 1, Height - 1), 14);
+        using var border = new Pen(Theme.Border, 1f);
+        g.DrawPath(border, card);
 
-        g.DrawString(_title, titleFont, titleBrush, new PointF(12, 10));
+        using var titleFont = Theme.Font(10.5f, FontStyle.Bold);
+        using var titleBrush = new SolidBrush(Theme.Ink);
+        g.DrawString(_title, titleFont, titleBrush, new PointF(18, 14));
+
+        using var accent = new SolidBrush(Theme.Gold);
+        g.FillRectangle(accent, 18, 38, 28, 3);
 
         if (_data.Count == 0)
         {
-            g.DrawString("(no data)", labelFont, labelBrush, new PointF(12, 42));
+            using var emptyFont = Theme.Font(9f);
+            using var emptyBrush = new SolidBrush(Theme.Muted);
+            using var centered = new StringFormat
+            {
+                Alignment = StringAlignment.Center,
+                LineAlignment = StringAlignment.Center
+            };
+            g.DrawString("No data available yet.", emptyFont, emptyBrush,
+                new RectangleF(0, 56, Width, Height - 56), centered);
             return;
         }
 
         int max = Math.Max(1, _data.Max(item => item.Count));
-        int top = 40;
-        int rowHeight = Math.Max(18, Math.Min(30, (Height - top - 12) / _data.Count));
-        int labelWidth = 145;
-        int countWidth = 40;
-        int barLeft = labelWidth + 12;
-        int barWidth = Math.Max(20, Width - barLeft - countWidth - 16);
+        const int top = 56;
+        int available = Math.Max(20, Height - top - 16);
+        int rowHeight = Math.Max(22, Math.Min(34, available / _data.Count));
+        const int labelWidth = 150;
+        const int countWidth = 42;
+        int barLeft = 18 + labelWidth + 12;
+        int barWidth = Math.Max(30, Width - barLeft - countWidth - 22);
+
+        using var labelFont = Theme.Font(8.75f);
+        using var valueFont = Theme.Font(8.75f, FontStyle.Bold);
+        using var labelBrush = new SolidBrush(Theme.Muted);
+        using var valueBrush = new SolidBrush(Theme.Ink);
+        using var trackBrush = new SolidBrush(Theme.SurfaceAlt);
 
         for (int i = 0; i < _data.Count; i++)
         {
@@ -65,26 +91,27 @@ public sealed class StatBarChart : Control
             int y = top + i * rowHeight;
             if (y + rowHeight > Height - 4) break;
 
-            var labelRect = new RectangleF(12, y, labelWidth, rowHeight);
-            var countRect = new RectangleF(Width - countWidth - 12, y, countWidth, rowHeight);
-            var barBounds = new Rectangle(barLeft, y + 5,
-                Math.Max(2, (int)(barWidth * (item.Count / (double)max))),
-                Math.Max(8, rowHeight - 10));
+            var labelRect = new RectangleF(18, y, labelWidth, rowHeight);
+            g.DrawString(item.Label, labelFont, labelBrush, labelRect);
 
-            g.DrawString(item.Label, labelFont, labelBrush,
-                new RectangleF(labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height));
+            int barY = y + Math.Max(4, (rowHeight - 10) / 2);
+            var track = new Rectangle(barLeft, barY, barWidth, 10);
+            using GraphicsPath trackPath = Theme.RoundedRect(track, 5);
+            g.FillPath(trackBrush, trackPath);
 
-            g.FillRectangle(emptyBrush, barLeft, y + 5, barWidth, Math.Max(8, rowHeight - 10));
-            g.FillRectangle(barBrush, barBounds);
+            int fillWidth = Math.Max(8, (int)(barWidth * (item.Count / (double)max)));
+            var fill = new Rectangle(barLeft, barY, fillWidth, 10);
+            using GraphicsPath fillPath = Theme.RoundedRect(fill, 5);
+            using var fillBrush = new SolidBrush(BarColors[i % BarColors.Length]);
+            g.FillPath(fillBrush, fillPath);
 
-            using var format = new StringFormat
+            var countRect = new RectangleF(Width - countWidth - 18, y, countWidth, rowHeight);
+            using var right = new StringFormat
             {
                 Alignment = StringAlignment.Far,
                 LineAlignment = StringAlignment.Center
             };
-            g.DrawString(item.Count.ToString(), valueFont, valueBrush,
-                new RectangleF(countRect.X, countRect.Y, countRect.Width, countRect.Height),
-                format);
+            g.DrawString(item.Count.ToString(), valueFont, valueBrush, countRect, right);
         }
     }
 }

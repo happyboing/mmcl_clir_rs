@@ -1,14 +1,10 @@
 namespace MMCL_CLIRRS;
 
-// Reservation form used by the interactive seat map. The spot is already
-// chosen from the map, so this dialog only asks for the user's details and
-// reservation time before sending the request through the normal service.
 public class ReserveSpotDialog : Form
 {
-    private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
-
     private readonly ReservationManagementService _service;
     private readonly ClirMapSpot _spot;
+    private readonly AvailabilityService _availability;
 
     private readonly TextBox _txtName = new TextBox();
     private readonly TextBox _txtIdNumber = new TextBox();
@@ -34,73 +30,51 @@ public class ReserveSpotDialog : Form
     {
         _service = service;
         _spot = spot;
+        _availability = new AvailabilityService(service);
 
         Text = "Reserve This Spot";
-        Font = new Font("Segoe UI", 10);
-        BackColor = Color.White;
+        Theme.StyleForm(this);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(460, 690);
+        ClientSize = new Size(820, 670);
 
-        Controls.Add(new Label
-        {
-            Text = "Reserve This Spot",
-            Dock = DockStyle.Top,
-            Height = 50,
-            BackColor = Maroon,
-            ForeColor = Color.White,
-            Font = new Font("Segoe UI", 14, FontStyle.Bold),
-            TextAlign = ContentAlignment.MiddleLeft,
-            Padding = new Padding(12, 0, 0, 0)
-        });
+        Controls.Add(Theme.CreateHeader(
+            "Reserve this spot",
+            $"{spot.SpotOrRoom}  •  {spot.TypeLabel}  •  {spot.Area}",
+            this, null, false, height: 68));
 
-        Controls.Add(new Label
+        var timeCard = BuildCard("Reservation time", "Choose when you would like to use this spot.",
+                                 24, 88, 366, 500);
+        var detailsCard = BuildCard("Your details", "Who is reserving?",
+                                    410, 88, 366, 500);
+        Controls.Add(timeCard);
+        Controls.Add(detailsCard);
+
+        timeCard.Controls.Add(new Label
         {
             Text = spot.SpotOrRoom,
-            Location = new Point(20, 60),
+            Location = new Point(20, 64),
             AutoSize = true,
-            ForeColor = Maroon,
-            Font = new Font("Segoe UI", 13, FontStyle.Bold)
+            Font = Theme.Font(13f, FontStyle.Bold),
+            ForeColor = Theme.Primary,
+            BackColor = Color.Transparent
         });
 
-        Controls.Add(new Label
+        timeCard.Controls.Add(new Label
         {
             Text = $"{spot.TypeLabel}  •  {spot.Area}",
-            Location = new Point(20, 88),
+            Location = new Point(21, 92),
             AutoSize = true,
-            ForeColor = Color.DimGray
+            Font = Theme.Font(8.75f),
+            ForeColor = Theme.Muted,
+            BackColor = Color.Transparent
         });
-
-        AddSectionTitle("Your details", 118);
-        AddRow("Full name:", _txtName, 146);
-        AddRow("ID number:", _txtIdNumber, 184);
-
-        _cmbUserType.DropDownStyle = ComboBoxStyle.DropDownList;
-        _cmbUserType.Items.AddRange(new object[] { "Student", "Faculty" });
-        _cmbUserType.SelectedIndex = 0;
-        AddRow("I am a:", _cmbUserType, 222);
-
-        _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
-        _cmbDepartment.Items.AddRange(AcademicPrograms.Departments);
-        AddRow("Department:", _cmbDepartment, 260);
-        _cmbDepartment.SelectedIndex = 0;
-
-        _cmbProgram.DropDownStyle = ComboBoxStyle.DropDownList;
-        AddRow("Program:", _cmbProgram, 298);
-        _cmbDepartment.SelectedIndexChanged += (s, e) => FillPrograms();
-
-        _numYear.Minimum = 1;
-        _numYear.Maximum = 6;
-        AddRow("Year level:", _numYear, 336);
-
-        AddSectionTitle("Reservation time", 378);
 
         _dtpDate.Format = DateTimePickerFormat.Short;
         _dtpDate.MinDate = DateTime.Today;
         _dtpDate.Value = defaultDate.Date < DateTime.Today ? DateTime.Today : defaultDate.Date;
-        AddRow("Date:", _dtpDate, 406);
 
         TimeSpan start = defaultTime;
         if (_dtpDate.Value.Date == DateTime.Today && start <= DateTime.Now.TimeOfDay)
@@ -117,28 +91,47 @@ public class ReserveSpotDialog : Form
 
         SetupTimePicker(_dtpStart, DateTime.Today.Add(start));
         SetupTimePicker(_dtpEnd, DateTime.Today.Add(end));
-        AddRow("Start time:", _dtpStart, 444);
-        AddRow("End time:", _dtpEnd, 482);
 
-        _lblAvailability.Location = new Point(20, 526);
-        _lblAvailability.Size = new Size(420, 24);
-        _lblAvailability.Font = new Font("Segoe UI", 10, FontStyle.Bold);
-        Controls.Add(_lblAvailability);
+        Theme.AddField(timeCard, "Date", _dtpDate, 20, 124, 326);
+        Theme.AddField(timeCard, "Start time", _dtpStart, 20, 184, 326);
+        Theme.AddField(timeCard, "End time", _dtpEnd, 20, 244, 326);
 
-        Controls.Add(new Label
-        {
-            Text = "Already booked for this spot on this date:",
-            Location = new Point(20, 554),
-            AutoSize = true,
-            ForeColor = Color.DimGray
-        });
+        _lblAvailability.Location = new Point(20, 312);
+        _lblAvailability.Size = new Size(326, 44);
+        _lblAvailability.TextAlign = ContentAlignment.MiddleLeft;
+        _lblAvailability.Padding = new Padding(10, 0, 6, 0);
+        _lblAvailability.BackColor = Theme.SurfaceAlt;
+        _lblAvailability.Font = Theme.Font(9.25f, FontStyle.Bold);
+        _lblAvailability.ForeColor = Theme.Muted;
+        timeCard.Controls.Add(_lblAvailability);
 
-        _lstBooked.Location = new Point(20, 578);
-        _lstBooked.Size = new Size(420, 48);
-        Controls.Add(_lstBooked);
+        Theme.AddReadOnlyList(timeCard, "Already booked on this date", _lstBooked,
+                              20, 370, 326, 76);
 
-        Button btnReserve = MakeButton("Reserve", Maroon, Color.White, 200, 638);
-        Button btnClose = MakeButton("Close", Color.White, Maroon, 320, 638);
+        _cmbUserType.DropDownStyle = ComboBoxStyle.DropDownList;
+        _cmbUserType.Items.AddRange(new object[] { "Student", "Faculty" });
+        _cmbUserType.SelectedIndex = 0;
+
+        _cmbDepartment.DropDownStyle = ComboBoxStyle.DropDownList;
+        _cmbDepartment.Items.AddRange(AcademicPrograms.Departments);
+        _cmbDepartment.SelectedIndex = 0;
+
+        _cmbProgram.DropDownStyle = ComboBoxStyle.DropDownList;
+
+        _numYear.Minimum = 1;
+        _numYear.Maximum = 6;
+
+        Theme.AddField(detailsCard, "Full name", _txtName, 20, 64, 326);
+        Theme.AddField(detailsCard, "ID number", _txtIdNumber, 20, 124, 326);
+        Theme.AddField(detailsCard, "I am a", _cmbUserType, 20, 184, 326);
+        Theme.AddField(detailsCard, "Department", _cmbDepartment, 20, 244, 326);
+        Theme.AddField(detailsCard, "Program", _cmbProgram, 20, 304, 326);
+        Theme.AddField(detailsCard, "Year level", _numYear, 20, 364, 326);
+
+        var btnReserve = Theme.MakeButton("Reserve", AppButtonKind.Primary, 130, 40);
+        var btnClose = Theme.MakeButton("Close", AppButtonKind.Secondary, 126, 40);
+        btnReserve.Location = new Point(526, 602);
+        btnClose.Location = new Point(670, 602);
         btnReserve.Click += btnReserve_Click;
         btnClose.Click += (s, e) => Close();
         AcceptButton = btnReserve;
@@ -146,13 +139,48 @@ public class ReserveSpotDialog : Form
         Controls.Add(btnReserve);
         Controls.Add(btnClose);
 
-        FillPrograms();
-        ApplyUserTypeRules();
+        _cmbDepartment.SelectedIndexChanged += (s, e) => FillPrograms();
         _cmbUserType.SelectedIndexChanged += (s, e) => ApplyUserTypeRules();
         _dtpDate.ValueChanged += (s, e) => RefreshAvailability();
         _dtpStart.ValueChanged += (s, e) => RefreshAvailability();
         _dtpEnd.ValueChanged += (s, e) => RefreshAvailability();
+
+        FillPrograms();
+        ApplyUserTypeRules();
         RefreshAvailability();
+    }
+
+    private static CardPanel BuildCard(string title, string subtitle, int x, int y, int width, int height)
+    {
+        var card = new CardPanel
+        {
+            Location = new Point(x, y),
+            Size = new Size(width, height),
+            BackColor = Theme.Surface,
+            BorderColor = Theme.Border
+        };
+
+        card.Controls.Add(new Label
+        {
+            Text = title,
+            Location = new Point(20, 16),
+            AutoSize = true,
+            Font = Theme.Font(12f, FontStyle.Bold),
+            ForeColor = Theme.Ink,
+            BackColor = Color.Transparent
+        });
+
+        card.Controls.Add(new Label
+        {
+            Text = subtitle,
+            Location = new Point(21, 42),
+            AutoSize = true,
+            Font = Theme.Font(8.5f),
+            ForeColor = Theme.Muted,
+            BackColor = Color.Transparent
+        });
+
+        return card;
     }
 
     private void FillPrograms()
@@ -186,24 +214,29 @@ public class ReserveSpotDialog : Form
         _lstBooked.Items.Clear();
         List<Reservation> booked = _service.GetBookedSlots(_spot.SpotOrRoom, date);
         if (booked.Count == 0)
-            _lstBooked.Items.Add("(nothing yet - the whole day is free)");
+            _lstBooked.Items.Add("Nothing yet — the whole day is free.");
         foreach (Reservation r in booked)
-            _lstBooked.Items.Add($"{Clock(r.StartTime)} - {Clock(r.EndTime)}");
+            _lstBooked.Items.Add($"{Clock(r.StartTime)} – {Clock(r.EndTime)}");
 
         if (end <= start)
         {
-            _lblAvailability.ForeColor = Color.DarkOrange;
+            _lblAvailability.ForeColor = Theme.Warning;
             _lblAvailability.Text = "End time must be after the start time.";
         }
         else if (_service.IsAvailable(_spot.SpotOrRoom, date, start, end))
         {
-            _lblAvailability.ForeColor = Color.SeaGreen;
+            _lblAvailability.ForeColor = Theme.Success;
             _lblAvailability.Text = "Available at this time.";
         }
         else
         {
-            _lblAvailability.ForeColor = Maroon;
-            _lblAvailability.Text = "Not available - already reserved at this time.";
+            TimeWindow? next = _availability.FindNextFreeSlot(
+                _spot.SpotOrRoom, date, end - start, start);
+
+            _lblAvailability.ForeColor = Theme.Danger;
+            _lblAvailability.Text = next == null
+                ? "Not available — no later free slot that day."
+                : $"Not available. Next free: {Clock(next.Start)} – {Clock(next.End)}";
         }
     }
 
@@ -240,49 +273,12 @@ public class ReserveSpotDialog : Form
         }
     }
 
-    private void AddSectionTitle(string text, int y)
-    {
-        Controls.Add(new Label
-        {
-            Text = text,
-            Location = new Point(20, y),
-            AutoSize = true,
-            ForeColor = Maroon,
-            Font = new Font("Segoe UI", 10, FontStyle.Bold)
-        });
-    }
-
-    private void AddRow(string label, Control control, int y)
-    {
-        Controls.Add(new Label { Text = label, Location = new Point(20, y + 3), AutoSize = true });
-        control.Location = new Point(150, y);
-        control.Width = 290;
-        Controls.Add(control);
-    }
-
     private static void SetupTimePicker(DateTimePicker picker, DateTime value)
     {
         picker.Format = DateTimePickerFormat.Custom;
         picker.CustomFormat = "HH:mm";
         picker.ShowUpDown = true;
         picker.Value = value;
-    }
-
-    private static Button MakeButton(string text, Color back, Color fore, int x, int y)
-    {
-        var button = new Button
-        {
-            Text = text,
-            Location = new Point(x, y),
-            Size = new Size(110, 36),
-            BackColor = back,
-            ForeColor = fore,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Font = new Font("Segoe UI", 10, FontStyle.Bold)
-        };
-        button.FlatAppearance.BorderColor = Maroon;
-        return button;
     }
 
     private static string Clock(TimeSpan t) => t.ToString(@"hh\:mm");

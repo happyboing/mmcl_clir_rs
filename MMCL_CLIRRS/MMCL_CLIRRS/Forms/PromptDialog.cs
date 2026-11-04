@@ -2,57 +2,54 @@
 
 public static class PromptDialog
 {
-    // Returns the typed text, or null if the user cancelled.
     public static string? Show(IWin32Window owner, string title, string message,
                                bool maskInput = false, string okText = "Verify")
     {
         using var form = new Form
         {
             Text = title,
-            Font = new Font("Segoe UI", 10),
-            BackColor = Color.White,
             FormBorderStyle = FormBorderStyle.FixedDialog,
             MaximizeBox = false,
             MinimizeBox = false,
             StartPosition = FormStartPosition.CenterParent,
-            ClientSize = new Size(380, 165)
+            ClientSize = new Size(470, 258)
         };
+        Theme.StyleForm(form);
 
-        var label = new Label { Text = message, Location = new Point(20, 20), Size = new Size(340, 45) };
-        var box = new TextBox
-        {
-            Location = new Point(20, 75),
-            Width = 340,
-            UseSystemPasswordChar = maskInput
-        };
+        form.Controls.Add(Theme.CreateHeader(title, "Secure staff access", form, null, false));
 
-        var ok = new Button
+        form.Controls.Add(new Label
         {
-            Text = okText,
-            DialogResult = DialogResult.OK,
-            Location = new Point(170, 115),
-            Size = new Size(90, 36),
-            BackColor = Color.FromArgb(183, 28, 28),
-            ForeColor = Color.White,
-            FlatStyle = FlatStyle.Flat,
-            Font = new Font("Segoe UI", 10, FontStyle.Bold)
-        };
-        var cancel = new Button
+            Text = message,
+            Location = new Point(30, 106),
+            Size = new Size(410, 44),
+            Font = Theme.Font(9.75f),
+            ForeColor = Theme.Ink,
+            BackColor = Color.Transparent
+        });
+
+        var box = new TextBox { UseSystemPasswordChar = maskInput };
+        var shell = new FieldShell(box, 42)
         {
-            Text = "Cancel",
-            DialogResult = DialogResult.Cancel,
-            Location = new Point(270, 115),
-            Size = new Size(90, 36),
-            FlatStyle = FlatStyle.Flat,
-            ForeColor = Color.FromArgb(183, 28, 28),
-            Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            Location = new Point(30, 150),
+            Width = 410
         };
-        cancel.FlatAppearance.BorderColor = Color.FromArgb(183, 28, 28);
+        form.Controls.Add(shell);
+
+        var ok = Theme.MakeButton(okText, AppButtonKind.Primary, 118, 40);
+        ok.DialogResult = DialogResult.OK;
+        ok.Location = new Point(322, 204);
+
+        var cancel = Theme.MakeButton("Cancel", AppButtonKind.Secondary, 118, 40);
+        cancel.DialogResult = DialogResult.Cancel;
+        cancel.Location = new Point(194, 204);
 
         form.AcceptButton = ok;
         form.CancelButton = cancel;
-        form.Controls.AddRange(new Control[] { label, box, ok, cancel });
+        form.Controls.Add(ok);
+        form.Controls.Add(cancel);
 
+        shell.Field.Focus();
         return form.ShowDialog(owner) == DialogResult.OK ? box.Text.Trim() : null;
     }
 }

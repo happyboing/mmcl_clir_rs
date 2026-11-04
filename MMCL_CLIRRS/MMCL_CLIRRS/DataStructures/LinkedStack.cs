@@ -1,6 +1,5 @@
 ﻿namespace MMCL_CLIRRS;
 
-// A stack built from linked nodes: the last item pushed is the first one out.
 public class LinkedStack<T>
 {
     private class Node
@@ -36,7 +35,6 @@ public class LinkedStack<T>
         return _top.Value;
     }
 
-    // Top (most recent) first.
     public List<T> ToList()
     {
         var items = new List<T>();

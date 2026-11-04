@@ -10,7 +10,6 @@ public enum TrendGrouping
     Year
 }
 
-// Everything the statistics/report screen needs, calculated once per refresh.
 public class ReservationStatistics
 {
     public int Total { get; init; }

@@ -14,16 +14,38 @@ public class UpdateReservationDialog : Form
 
     public UpdateReservationDialog(Reservation reservation)
     {
-        Text = $"Update Reservation #{reservation.ReservationId} - {reservation.UserName}";
-        Font = new Font("Segoe UI", 10);
-        BackColor = Color.White;
+        Text = $"Update Reservation #{reservation.ReservationId}";
+        Theme.StyleForm(this);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
         StartPosition = FormStartPosition.CenterParent;
-        ClientSize = new Size(380, 250);
+        ClientSize = new Size(520, 508);
 
-        // Only seats and rooms that exist in the CLIR layout can be chosen.
+        Controls.Add(Theme.CreateHeader(
+            $"Update reservation #{reservation.ReservationId}",
+            $"{reservation.UserName}  •  {reservation.UserIdNumber}",
+            this, null, false));
+
+        var card = new CardPanel
+        {
+            Location = new Point(24, 106),
+            Size = new Size(472, 308),
+            BackColor = Theme.Surface,
+            BorderColor = Theme.Border
+        };
+        Controls.Add(card);
+
+        card.Controls.Add(new Label
+        {
+            Text = "Reservation details",
+            Location = new Point(20, 15),
+            AutoSize = true,
+            Font = Theme.Font(11.5f, FontStyle.Bold),
+            ForeColor = Theme.Ink,
+            BackColor = Color.Transparent
+        });
+
         _cmbSpot.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbSpot.Items.AddRange(ClirLayout.GetSeats().ToArray());
         _cmbSpot.Items.AddRange(ClirLayout.GetDiscussionRooms().ToArray());
@@ -34,15 +56,18 @@ public class UpdateReservationDialog : Form
         ConfigureTimePicker(_dtpStart, reservation.StartTime);
         ConfigureTimePicker(_dtpEnd, reservation.EndTime);
 
-        AddRow("Spot / Room:", _cmbSpot, 20);
-        AddRow("Date:", _dtpDate, 60);
-        AddRow("Start time:", _dtpStart, 100);
-        AddRow("End time:", _dtpEnd, 140);
+        Theme.AddField(card, "Spot / Room", _cmbSpot, 20, 56, 432);
+        Theme.AddField(card, "Date", _dtpDate, 20, 116, 432);
+        Theme.AddField(card, "Start time", _dtpStart, 20, 176, 208);
+        Theme.AddField(card, "End time", _dtpEnd, 244, 176, 208);
 
-        Button btnSave = CreateButton("Save", Color.FromArgb(183, 28, 28), Color.White, 140);
-        Button btnCancel = CreateButton("Cancel", Color.White, Color.FromArgb(183, 28, 28), 250);
-        btnCancel.DialogResult = DialogResult.Cancel;
+        var btnSave = Theme.MakeButton("Save changes", AppButtonKind.Primary, 132, 40);
+        btnSave.Location = new Point(364, 442);
         btnSave.Click += (s, e) => { if (IsInputValid()) DialogResult = DialogResult.OK; };
+
+        var btnCancel = Theme.MakeButton("Cancel", AppButtonKind.Secondary, 118, 40);
+        btnCancel.DialogResult = DialogResult.Cancel;
+        btnCancel.Location = new Point(234, 442);
 
         AcceptButton = btnSave;
         CancelButton = btnCancel;
@@ -56,31 +81,6 @@ public class UpdateReservationDialog : Form
         picker.CustomFormat = "HH:mm";
         picker.ShowUpDown = true;
         picker.Value = DateTime.Today.Add(time);
-    }
-
-    private void AddRow(string label, Control control, int y)
-    {
-        Controls.Add(new Label { Text = label, Location = new Point(20, y + 3), AutoSize = true });
-        control.Location = new Point(140, y);
-        control.Width = 210;
-        Controls.Add(control);
-    }
-
-    private static Button CreateButton(string text, Color back, Color fore, int x)
-    {
-        var button = new Button
-        {
-            Text = text,
-            Location = new Point(x, 195),
-            Size = new Size(100, 36),
-            BackColor = back,
-            ForeColor = fore,
-            FlatStyle = FlatStyle.Flat,
-            Cursor = Cursors.Hand,
-            Font = new Font("Segoe UI", 10, FontStyle.Bold)
-        };
-        button.FlatAppearance.BorderColor = Color.FromArgb(183, 28, 28);
-        return button;
     }
 
     private bool IsInputValid()

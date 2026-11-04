@@ -2,7 +2,6 @@
 
 public class AvlTree<TKey> : IReservationIndex<TKey>
 {
-    // Private nested node: outside code never touches the tree's internals.
     private class Node
     {
         public TKey Key;
@@ -18,14 +17,11 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
 
     public int Count { get; private set; }
 
-    // keySelector says which field this tree is indexed by.
     public AvlTree(Func<Reservation, TKey> keySelector, IComparer<TKey>? comparer = null)
     {
         _keySelector = keySelector;
         _comparer = comparer ?? Comparer<TKey>.Default;
     }
-
-    // ---------- Public operations ----------
 
     public void Insert(Reservation reservation)
     {
@@ -41,7 +37,6 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
         return removed;
     }
 
-    // Exact match: all reservations with this key.
     public IReadOnlyList<Reservation> Find(TKey key)
     {
         Node? node = _root;
@@ -54,15 +49,12 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
         return Array.Empty<Reservation>();
     }
 
-    // Range match (e.g. all reservations from Nov 3 to Nov 7), returned in key order.
     public List<Reservation> FindRange(TKey low, TKey high)
     {
         var result = new List<Reservation>();
         CollectRange(_root, low, high, result);
         return result;
     }
-
-    // ---------- Insert / Remove ----------
 
     private Node Insert(Node? node, Reservation reservation)
     {
@@ -80,7 +72,7 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
         else if (cmp > 0) node.Right = Insert(node.Right, reservation);
         else
         {
-            node.Items.Add(reservation);   // same key: add to this node's list
+            node.Items.Add(reservation);
             return node;
         }
 
@@ -96,15 +88,14 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
         else if (cmp > 0) node.Right = Remove(node.Right, reservation, ref removed);
         else
         {
-            if (!node.Items.Remove(reservation)) return node;  // not found in this bucket
+            if (!node.Items.Remove(reservation)) return node;
             removed = true;
-            if (node.Items.Count > 0) return node;             // others still share this key
+            if (node.Items.Count > 0) return node;
 
-            // Bucket is empty, so delete the node itself.
             if (node.Left == null) return node.Right;
             if (node.Right == null) return node.Left;
 
-            Node successor = MinNode(node.Right);              // two children: use in-order successor
+            Node successor = MinNode(node.Right);
             node.Key = successor.Key;
             node.Items = successor.Items;
             node.Right = RemoveMin(node.Right);
@@ -140,8 +131,6 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
             CollectRange(node.Right, low, high, result);
     }
 
-    // ---------- AVL balancing ----------
-
     private static int Height(Node? n) => n?.Height ?? 0;
     private static void UpdateHeight(Node n) => n.Height = 1 + Math.Max(Height(n.Left), Height(n.Right));
     private static int BalanceFactor(Node n) => Height(n.Left) - Height(n.Right);
@@ -171,15 +160,15 @@ public class AvlTree<TKey> : IReservationIndex<TKey>
         UpdateHeight(n);
         int balance = BalanceFactor(n);
 
-        if (balance > 1)                                   // left-heavy
+        if (balance > 1)
         {
-            if (BalanceFactor(n.Left!) < 0)                // left-right case
+            if (BalanceFactor(n.Left!) < 0)
                 n.Left = RotateLeft(n.Left!);
             return RotateRight(n);
         }
-        if (balance < -1)                                  // right-heavy
+        if (balance < -1)
         {
-            if (BalanceFactor(n.Right!) > 0)               // right-left case
+            if (BalanceFactor(n.Right!) > 0)
                 n.Right = RotateRight(n.Right!);
             return RotateLeft(n);
         }

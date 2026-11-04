@@ -1,18 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// ============================================================
-//  QUEUE  (Functionality #1)
-//
-//  A queue is a line at a cashier: FIRST in line = FIRST served.
-//    Enqueue = join the back of the line
-//    Dequeue = the person at the FRONT leaves and gets served
-//
-//      front                          back
-//        |                              |
-//      [Req 1] -> [Req 2] -> [Req 3] -> null
-//
-//  Built from linked nodes, same idea as LinkedStack.
-// ============================================================
 public class LinkedQueue<T>
 {
     private class Node
@@ -33,12 +20,11 @@ public class LinkedQueue<T>
     public int Count { get; private set; }
     public bool IsEmpty => _front == null;
 
-    // Join the back of the line.
     public void Enqueue(T item)
     {
         var newNode = new Node(item);
 
-        if (_back == null)            // empty line
+        if (_back == null)
         {
             _front = newNode;
             _back = newNode;
@@ -52,7 +38,6 @@ public class LinkedQueue<T>
         Count++;
     }
 
-    // Take the person at the FRONT of the line.
     public T Dequeue()
     {
         if (_front == null)
@@ -60,13 +45,20 @@ public class LinkedQueue<T>
 
         T value = _front.Value;
         _front = _front.Next;
-        if (_front == null) _back = null;   // line is now empty
+        if (_front == null) _back = null;
 
         Count--;
         return value;
     }
 
-    // Look at who is first without removing them.
+    public List<T> ToList()
+    {
+        var items = new List<T>();
+        for (Node? node = _front; node != null; node = node.Next)
+            items.Add(node.Value);
+        return items;
+    }
+
     public T Peek()
     {
         if (_front == null)

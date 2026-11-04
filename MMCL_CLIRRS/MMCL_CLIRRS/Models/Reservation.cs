@@ -4,7 +4,7 @@ public class Reservation
 {
     public int ReservationId { get; }
     public string UserName { get; }
-    public string UserIdNumber { get; }       // student/faculty ID
+    public string UserIdNumber { get; }
     public UserType UserType { get; }
     public string Department { get; }
     public string Program { get; }
@@ -39,7 +39,6 @@ public class Reservation
         Status = ReservationStatus.Active;
     }
 
-    // Validates first, then changes, so a bad request leaves the reservation untouched.
     public void Reschedule(string spotOrRoom, bool isDiscussionRoom,
                            DateTime date, TimeSpan startTime, TimeSpan endTime)
     {

@@ -1,6 +1,5 @@
 ﻿namespace MMCL_CLIRRS;
 
-// Anything that can index reservations: add, remove, look up.
 public interface IReservationIndex
 {
     void Insert(Reservation reservation);

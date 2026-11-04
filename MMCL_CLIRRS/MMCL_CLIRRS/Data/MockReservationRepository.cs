@@ -1,6 +1,5 @@
 ﻿namespace MMCL_CLIRRS;
 
-// TEMPORARY: replaced by #1's linked list later. Same interface, so nothing else changes.
 public class MockReservationRepository : IReservationRepository
 {
     private readonly List<Reservation> _reservations = new List<Reservation>();
