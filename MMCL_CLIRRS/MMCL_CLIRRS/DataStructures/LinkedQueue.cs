@@ -66,6 +66,15 @@ public class LinkedQueue<T>
         return value;
     }
 
+    // Everyone in line, front first. Does not remove anyone.
+    public List<T> ToList()
+    {
+        var items = new List<T>();
+        for (Node? node = _front; node != null; node = node.Next)
+            items.Add(node.Value);
+        return items;
+    }
+
     // Look at who is first without removing them.
     public T Peek()
     {

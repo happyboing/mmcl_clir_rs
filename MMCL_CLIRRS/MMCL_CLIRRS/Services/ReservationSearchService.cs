@@ -22,6 +22,10 @@ public class ReservationSearchService
     private readonly LinkedStack<ActivityLogEntry> _activityLog = new LinkedStack<ActivityLogEntry>();
     private readonly LinkedStack<UndoableOperation> _undoStack = new LinkedStack<UndoableOperation>();
 
+    // Raised after a reservation is added or changed (status, spot, date or time).
+    // Functionality #2's grace-period monitor listens to this to keep its schedule up to date.
+    public event Action<Reservation>? ReservationChanged;
+
     public ReservationSearchService(IReservationRepository repository)
     {
         _repository = repository;
@@ -52,6 +56,8 @@ public class ReservationSearchService
     {
         foreach (IReservationIndex index in _indexes)
             index.Insert(r);
+
+        ReservationChanged?.Invoke(r);
     }
 
     // ---------- Searches ----------
@@ -220,6 +226,8 @@ public class ReservationSearchService
             foreach (IReservationIndex index in _indexes)
                 index.Insert(r);
         }
+
+        ReservationChanged?.Invoke(r);
     }
 
     // Uses the spot hash index, so only reservations for that spot are examined.

@@ -19,7 +19,11 @@ namespace MMCL_CLIRRS
             // 3. Functionality #1 (reservation management) uses both of them.
             var managementService = new ReservationManagementService(reservations, searchService);
 
-            Application.Run(new MainMenuForm(managementService, searchService));
+            // 4. Functionality #2 (scheduling): watches the 5-minute grace period and
+            //    releases seats nobody came for. A timer inside MainMenuForm drives it.
+            var monitorService = new ReservationMonitorService(reservations, searchService);
+
+            Application.Run(new MainMenuForm(managementService, searchService, monitorService));
         }
     }
 }

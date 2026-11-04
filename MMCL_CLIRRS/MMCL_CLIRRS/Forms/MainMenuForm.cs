@@ -8,14 +8,19 @@ public class MainMenuForm : Form
 
     private readonly ReservationManagementService _management;
     private readonly ReservationSearchService _search;
+    private readonly ReservationMonitorService _monitor;
+    private readonly Button _btnAlerts;
+    private readonly System.Windows.Forms.Timer _monitorTimer = new System.Windows.Forms.Timer();
 
     // CHANGE THIS PIN before the demo.
     private readonly StaffAccessControl _staffAccess = new StaffAccessControl("2468");
 
-    public MainMenuForm(ReservationManagementService management, ReservationSearchService search)
+    public MainMenuForm(ReservationManagementService management, ReservationSearchService search,
+                        ReservationMonitorService monitor)
     {
         _management = management;
         _search = search;
+        _monitor = monitor;
 
         Text = "MMCL CLIRRS";
         Font = new Font("Segoe UI", 10);
@@ -23,7 +28,7 @@ public class MainMenuForm : Form
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
         StartPosition = FormStartPosition.CenterScreen;
-        ClientSize = new Size(420, 360);
+        ClientSize = new Size(420, 430);
 
         Controls.Add(new Label
         {
@@ -41,13 +46,61 @@ public class MainMenuForm : Form
         Button btnStats = MakeMenuButton("Staff: Reservation Statistics and Reports", 240);
         btnStats.Font = new Font("Segoe UI", 10, FontStyle.Bold);
 
-        btnMap.Click += (s, e) => { using var f = new SeatMapForm(_management); f.ShowDialog(this); };
+        _btnAlerts = MakeMenuButton("Staff: Grace-Period Alerts", 310);
+
+        btnMap.Click += (s, e) => { using var f = new SeatMapForm(_management, _monitor); f.ShowDialog(this); };
         btnStaff.Click += (s, e) => OpenStaffScreen();
         btnStats.Click += (s, e) => OpenStatisticsScreen();
+        _btnAlerts.Click += (s, e) => OpenAlertsScreen();
 
         Controls.Add(btnMap);
         Controls.Add(btnStaff);
         Controls.Add(btnStats);
+        Controls.Add(_btnAlerts);
+
+        // Functionality #2: every second, release reservations whose grace period is over.
+        _monitor.AlertRaised += OnAlertRaised;
+        _monitor.AlertsChanged += UpdateAlertsButton;
+        _monitorTimer.Interval = 1000;
+        _monitorTimer.Tick += (s, e) => _monitor.ProcessDue(DateTime.Now);
+        _monitorTimer.Start();
+
+        FormClosed += (s, e) =>
+        {
+            _monitorTimer.Stop();
+            _monitorTimer.Dispose();
+            _monitor.AlertRaised -= OnAlertRaised;
+            _monitor.AlertsChanged -= UpdateAlertsButton;
+        };
+
+        UpdateAlertsButton();
+    }
+
+    // A reserved seat reached the grace period unoccupied: make a sound so the staff notice.
+    private void OnAlertRaised(StaffNotification alert)
+    {
+        System.Media.SystemSounds.Exclamation.Play();
+    }
+
+    // Shows how many alerts are waiting; the button turns red when there are any.
+    private void UpdateAlertsButton()
+    {
+        int count = _monitor.PendingAlertCount;
+        bool hasAlerts = count > 0;
+
+        _btnAlerts.Text = hasAlerts
+            ? $"Staff: Grace-Period Alerts ({count})"
+            : "Staff: Grace-Period Alerts";
+        _btnAlerts.BackColor = hasAlerts ? Maroon : Color.White;
+        _btnAlerts.ForeColor = hasAlerts ? Color.White : Maroon;
+    }
+
+    private void OpenAlertsScreen()
+    {
+        if (!TryStaffAccess()) return;
+
+        using var form = new StaffAlertsForm(_monitor);
+        form.ShowDialog(this);
     }
 
     // Students never see staff screens: they open only after the correct PIN.

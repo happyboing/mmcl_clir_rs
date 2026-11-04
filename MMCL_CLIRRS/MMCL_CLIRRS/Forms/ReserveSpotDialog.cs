@@ -9,6 +9,7 @@ public class ReserveSpotDialog : Form
 
     private readonly ReservationManagementService _service;
     private readonly ClirMapSpot _spot;
+    private readonly AvailabilityService _availability;
 
     private readonly TextBox _txtName = new TextBox();
     private readonly TextBox _txtIdNumber = new TextBox();
@@ -34,6 +35,7 @@ public class ReserveSpotDialog : Form
     {
         _service = service;
         _spot = spot;
+        _availability = new AvailabilityService(service);
 
         Text = "Reserve This Spot";
         Font = new Font("Segoe UI", 10);
@@ -202,8 +204,14 @@ public class ReserveSpotDialog : Form
         }
         else
         {
+            // Suggest the next gap of the same length so the user does not have to guess.
+            TimeWindow? next = _availability.FindNextFreeSlot(
+                _spot.SpotOrRoom, date, end - start, start);
+
             _lblAvailability.ForeColor = Maroon;
-            _lblAvailability.Text = "Not available - already reserved at this time.";
+            _lblAvailability.Text = next == null
+                ? "Not available - no later free slot that day."
+                : $"Not available. Next free: {Clock(next.Start)} - {Clock(next.End)}";
         }
     }
 

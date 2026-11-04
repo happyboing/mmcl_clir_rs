@@ -16,7 +16,9 @@ public class SeatMapForm : Form
     private static readonly Color Ink = Color.FromArgb(38, 50, 56);
 
     private readonly ReservationManagementService _management;
+    private readonly ReservationMonitorService? _monitor;
     private readonly SeatMapService _service;
+    private readonly Label _lblAlerts = new Label();
 
     private readonly Panel _mapPanel = new BufferedPanel();
     private readonly Dictionary<string, SeatSpotControl> _seatControls = new();
@@ -47,9 +49,11 @@ public class SeatMapForm : Form
     private bool _followingNow = true;
     private bool _updatingPickers;
 
-    public SeatMapForm(ReservationManagementService management)
+    public SeatMapForm(ReservationManagementService management,
+                       ReservationMonitorService? monitor = null)
     {
         _management = management;
+        _monitor = monitor;
         _service = new SeatMapService(management);
 
         Text = "CLIR Interactive Seat Map";
@@ -85,8 +89,23 @@ public class SeatMapForm : Form
         };
         _refreshTimer.Start();
 
+        // Functionality #2: when the grace-period monitor releases or completes a
+        // reservation, redraw the map right away instead of waiting for the next refresh.
+        if (_monitor != null)
+        {
+            _monitor.ScheduleChanged += OnScheduleChanged;
+            _monitor.AlertsChanged += UpdateAlertsLabel;
+            UpdateAlertsLabel();
+        }
+
         FormClosed += (s, e) =>
         {
+            if (_monitor != null)
+            {
+                _monitor.ScheduleChanged -= OnScheduleChanged;
+                _monitor.AlertsChanged -= UpdateAlertsLabel;
+            }
+
             SaveSessionState();
             _refreshTimer.Dispose();
             _toolTip.Dispose();
@@ -141,7 +160,33 @@ public class SeatMapForm : Form
         btnHome.Click += (s, e) => Close();
         header.Controls.Add(btnHome);
 
+        // Shows when a seat was released because nobody came within the grace period.
+        _lblAlerts.AutoSize = false;
+        _lblAlerts.Location = new Point(ClientSize.Width - 520, 18);
+        _lblAlerts.Size = new Size(350, 24);
+        _lblAlerts.TextAlign = ContentAlignment.MiddleRight;
+        _lblAlerts.ForeColor = Color.White;
+        _lblAlerts.Font = new Font("Segoe UI", 9, FontStyle.Bold);
+        _lblAlerts.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        header.Controls.Add(_lblAlerts);
+
         Controls.Add(header);
+    }
+
+    private void OnScheduleChanged()
+    {
+        if (IsDisposed) return;
+        RefreshMap();
+    }
+
+    private void UpdateAlertsLabel()
+    {
+        if (IsDisposed || _monitor == null) return;
+
+        int count = _monitor.PendingAlertCount;
+        _lblAlerts.Text = count == 0
+            ? ""
+            : $"⚠ {count} unoccupied seat alert(s) – staff notified";
     }
 
     private void BuildToolbar()
