@@ -2,8 +2,6 @@ using System.Drawing.Drawing2D;
 
 namespace MMCL_CLIRRS;
 
-// The eight pie-cut seats are one round shape, so they are drawn by one
-// control that works out which slice was clicked.
 public sealed class PieSpotControl : Control
 {
     private static readonly Color AvailableFill = Color.FromArgb(232, 245, 233);
@@ -107,7 +105,6 @@ public sealed class PieSpotControl : Control
             g.FillPath(fillBrush, path);
             g.DrawPath(linePen, path);
 
-            // Seat number in the middle of the slice.
             double middleAngle = (startAngle + SliceAngle / 2f) * Math.PI / 180.0;
             float labelX = center.X + (float)(21 * Math.Cos(middleAngle));
             float labelY = center.Y + (float)(21 * Math.Sin(middleAngle));
@@ -123,7 +120,6 @@ public sealed class PieSpotControl : Control
                 new RectangleF(labelX - 9, labelY - 8, 18, 16), format);
         }
 
-        // A small centre dot makes the pie shape clearer.
         using var dotBrush = new SolidBrush(Color.FromArgb(96, 125, 139));
         g.FillEllipse(dotBrush, center.X - 3, center.Y - 3, 6, 6);
 

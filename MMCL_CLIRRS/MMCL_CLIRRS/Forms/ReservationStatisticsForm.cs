@@ -1,6 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Staff-facing reservation statistics and reports dashboard.
 public class ReservationStatisticsForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -178,10 +177,6 @@ public class ReservationStatisticsForm : Form
         _contentPanel.ResumeLayout();
     }
 
-    // =========================================================
-    //  Overview
-    // =========================================================
-
     private TabPage BuildOverviewTab()
     {
         var page = NewPage("Overview");
@@ -260,10 +255,6 @@ public class ReservationStatisticsForm : Form
         return card;
     }
 
-    // =========================================================
-    //  Locations
-    // =========================================================
-
     private TabPage BuildLocationsTab()
     {
         var page = NewPage("Locations");
@@ -274,10 +265,6 @@ public class ReservationStatisticsForm : Form
 
         return page;
     }
-
-    // =========================================================
-    //  Users
-    // =========================================================
 
     private TabPage BuildUsersTab()
     {
@@ -311,10 +298,6 @@ public class ReservationStatisticsForm : Form
         page.Controls.Add(layout);
         return page;
     }
-
-    // =========================================================
-    //  Activity stack
-    // =========================================================
 
     private TabPage BuildActivityTab()
     {
@@ -350,10 +333,6 @@ public class ReservationStatisticsForm : Form
         page.Controls.Add(group);
         return page;
     }
-
-    // =========================================================
-    //  Small UI helpers
-    // =========================================================
 
     private static TabPage NewPage(string title)
         => new TabPage(title)

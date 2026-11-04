@@ -32,7 +32,7 @@ public class ActivityLogForm : Form
         if (entries.Count == 0) list.Items.Add("No operations recorded yet.");
         else list.DataSource = entries;
 
-        Controls.Add(list);     // fill control added first, then the docked header
+        Controls.Add(list);
         Controls.Add(header);
     }
 }

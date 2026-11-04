@@ -4,11 +4,6 @@ public sealed record GraphNode(string Id, string Label, int Weight);
 public sealed record GraphEdge(string FromId, string FromLabel,
                                string ToId, string ToLabel, int Weight);
 
-// Weighted graph used by the statistics screen:
-//   user ── reserves ──> location
-//   user ── owns ──────> reservation
-//   reservation ───────> location
-// This makes user/location/reservation relationships easy to rank.
 public class ReservationGraph
 {
     private readonly Dictionary<string, string> _labels =
@@ -38,7 +33,6 @@ public class ReservationGraph
         neighbors[toId] = neighbors.GetValueOrDefault(toId) + weight;
     }
 
-    // Highest total outgoing weight among nodes with the given prefix.
     public IReadOnlyList<GraphNode> TopNodes(string prefix, int count)
     {
         return _edges
@@ -56,7 +50,6 @@ public class ReservationGraph
             .ToList();
     }
 
-    // Strongest connections between a "from" category and a "to" category.
     public IReadOnlyList<GraphEdge> TopEdges(string fromPrefix, string toPrefix, int count)
     {
         var result = new List<GraphEdge>();

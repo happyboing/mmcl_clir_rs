@@ -1,6 +1,5 @@
 ﻿namespace MMCL_CLIRRS;
 
-// Each comparer defines one way to order reservations.
 public class ReservationIdComparer : IComparer<Reservation>
 {
     public int Compare(Reservation? a, Reservation? b)

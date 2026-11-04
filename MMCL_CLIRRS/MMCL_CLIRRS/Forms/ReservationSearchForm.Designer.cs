@@ -2,15 +2,8 @@
 {
     partial class ReservationSearchForm
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,10 +15,6 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             lblSearchBy = new Label();
@@ -47,9 +36,6 @@
             ((System.ComponentModel.ISupportInitialize)dgvReservations).BeginInit();
             pnlHeader.SuspendLayout();
             SuspendLayout();
-            // 
-            // lblSearchBy
-            // 
             lblSearchBy.AutoSize = true;
             lblSearchBy.Font = new Font("Segoe UI", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
             lblSearchBy.ForeColor = Color.FromArgb(183, 28, 28);
@@ -58,41 +44,26 @@
             lblSearchBy.Size = new Size(71, 17);
             lblSearchBy.TabIndex = 0;
             lblSearchBy.Text = "Search by:";
-            // 
-            // cmbFilter
-            // 
             cmbFilter.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbFilter.FormattingEnabled = true;
             cmbFilter.Location = new Point(100, 80);
             cmbFilter.Name = "cmbFilter";
             cmbFilter.Size = new Size(170, 25);
             cmbFilter.TabIndex = 1;
-            // 
-            // txtSearch
-            // 
             txtSearch.Location = new Point(285, 80);
             txtSearch.Name = "txtSearch";
             txtSearch.Size = new Size(260, 25);
             txtSearch.TabIndex = 2;
-            // 
-            // dtpFrom
-            // 
             dtpFrom.Format = DateTimePickerFormat.Short;
             dtpFrom.Location = new Point(285, 80);
             dtpFrom.Name = "dtpFrom";
             dtpFrom.Size = new Size(125, 25);
             dtpFrom.TabIndex = 3;
-            // 
-            // dtpTo
-            // 
             dtpTo.Format = DateTimePickerFormat.Short;
             dtpTo.Location = new Point(420, 80);
             dtpTo.Name = "dtpTo";
             dtpTo.Size = new Size(125, 25);
             dtpTo.TabIndex = 4;
-            // 
-            // btnSearch
-            // 
             btnSearch.BackColor = Color.FromArgb(183, 28, 28);
             btnSearch.Cursor = Cursors.Hand;
             btnSearch.FlatAppearance.BorderSize = 0;
@@ -105,9 +76,6 @@
             btnSearch.TabIndex = 5;
             btnSearch.Text = "Search";
             btnSearch.UseVisualStyleBackColor = false;
-            // 
-            // btnShowAll
-            // 
             btnShowAll.BackColor = Color.White;
             btnShowAll.Cursor = Cursors.Hand;
             btnShowAll.FlatAppearance.BorderColor = Color.FromArgb(183, 28, 28);
@@ -120,9 +88,6 @@
             btnShowAll.TabIndex = 6;
             btnShowAll.Text = "Show All";
             btnShowAll.UseVisualStyleBackColor = false;
-            // 
-            // btnCancelReservation
-            // 
             btnCancelReservation.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnCancelReservation.BackColor = Color.FromArgb(140, 20, 20);
             btnCancelReservation.Cursor = Cursors.Hand;
@@ -136,9 +101,6 @@
             btnCancelReservation.TabIndex = 7;
             btnCancelReservation.Text = "Cancel Reservation";
             btnCancelReservation.UseVisualStyleBackColor = false;
-            // 
-            // dgvReservations
-            // 
             dgvReservations.AllowUserToAddRows = false;
             dgvReservations.AllowUserToDeleteRows = false;
             dgvReservations.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
@@ -154,9 +116,6 @@
             dgvReservations.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvReservations.Size = new Size(960, 405);
             dgvReservations.TabIndex = 8;
-            // 
-            // pnlHeader
-            // 
             pnlHeader.BackColor = Color.FromArgb(183, 28, 28);
             pnlHeader.Controls.Add(lblTitle);
             pnlHeader.Dock = DockStyle.Top;
@@ -164,9 +123,6 @@
             pnlHeader.Name = "pnlHeader";
             pnlHeader.Size = new Size(984, 60);
             pnlHeader.TabIndex = 9;
-            // 
-            // lblTitle
-            // 
             lblTitle.AutoSize = true;
             lblTitle.BackColor = Color.Transparent;
             lblTitle.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
@@ -176,18 +132,12 @@
             lblTitle.Size = new Size(451, 30);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "CLIR Reservation Search and Management";
-            // 
-            // cmbStatus
-            // 
             cmbStatus.DropDownStyle = ComboBoxStyle.DropDownList;
             cmbStatus.FormattingEnabled = true;
             cmbStatus.Location = new Point(285, 80);
             cmbStatus.Name = "cmbStatus";
             cmbStatus.Size = new Size(170, 25);
             cmbStatus.TabIndex = 10;
-            // 
-            // btnActivityLog
-            // 
             btnActivityLog.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             btnActivityLog.BackColor = Color.White;
             btnActivityLog.Cursor = Cursors.Hand;
@@ -200,9 +150,6 @@
             btnActivityLog.TabIndex = 11;
             btnActivityLog.Text = "Activity Log";
             btnActivityLog.UseVisualStyleBackColor = false;
-            // 
-            // btnVerify
-            // 
             btnVerify.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnVerify.BackColor = Color.FromArgb(183, 28, 28);
             btnVerify.Cursor = Cursors.Hand;
@@ -215,9 +162,6 @@
             btnVerify.TabIndex = 12;
             btnVerify.Text = "Verify";
             btnVerify.UseVisualStyleBackColor = false;
-            // 
-            // btnUpdate
-            // 
             btnUpdate.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnUpdate.BackColor = Color.FromArgb(183, 28, 28);
             btnUpdate.Cursor = Cursors.Hand;
@@ -230,9 +174,6 @@
             btnUpdate.TabIndex = 13;
             btnUpdate.Text = "Update";
             btnUpdate.UseVisualStyleBackColor = false;
-            // 
-            // btnUndo
-            // 
             btnUndo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnUndo.BackColor = Color.White;
             btnUndo.Cursor = Cursors.Hand;
@@ -245,9 +186,6 @@
             btnUndo.TabIndex = 14;
             btnUndo.Text = "Undo Last";
             btnUndo.UseVisualStyleBackColor = false;
-            // 
-            // ReservationSearchForm
-            // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(984, 636);

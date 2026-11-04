@@ -1,11 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// ============================================================
-//  Functionality #2: Reservation Scheduling and Availability
-//  The staff alert screen. Every alert here means a reserved seat reached the
-//  5-minute grace period without being occupied and was released.
-//  Alerts are listed oldest first (they wait in a queue).
-// ============================================================
 public class StaffAlertsForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -67,12 +61,10 @@ public class StaffAlertsForm : Form
         footer.Controls.Add(_btnAll);
         footer.Controls.Add(btnClose);
 
-        // The fill control goes in first, then the docked header and footer.
         Controls.Add(_list);
         Controls.Add(footer);
         Controls.Add(header);
 
-        // Stay up to date while open: new alerts arrive and acknowledged ones disappear.
         _monitor.AlertsChanged += Reload;
         FormClosed += (s, e) => _monitor.AlertsChanged -= Reload;
 

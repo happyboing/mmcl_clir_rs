@@ -1,8 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Builds the staff statistics from the live reservation records.
-// The source is the linked list of reservations, the AVL date tree keeps the
-// trend data ordered, and the graph ranks user/location relationships.
 public class ReservationStatisticsService
 {
     private readonly ReservationSearchService _search;
@@ -14,7 +11,6 @@ public class ReservationStatisticsService
 
     public ReservationStatistics Build(TrendGrouping trendGrouping = TrendGrouping.Day)
     {
-        // Expired records are no longer shown in the reports.
         List<Reservation> all = _search.GetAllChronological()
             .Where(r => r.Status != ReservationStatus.Expired)
             .ToList();
@@ -82,7 +78,6 @@ public class ReservationStatisticsService
     {
         if (all.Count == 0) return new List<CountItem>();
 
-        // Use the AVL tree to keep the days in sorted order before grouping.
         var dateTree = new AvlTree<DateTime>(r => r.Date.Date);
         foreach (Reservation reservation in all)
             dateTree.Insert(reservation);

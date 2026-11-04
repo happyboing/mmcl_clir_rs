@@ -3,8 +3,6 @@ using System.Drawing.Drawing2D;
 
 namespace MMCL_CLIRRS;
 
-// One clickable seat or piece of furniture on the interactive map.
-// A reserved spot draws its own "Cancel" button directly below it.
 public sealed class SeatSpotControl : Control
 {
     private static readonly Color AvailableFill = Color.FromArgb(232, 245, 233);
@@ -227,7 +225,6 @@ public sealed class SeatSpotControl : Control
 
         if (Height > Width * 2)
         {
-            // Vertical couch: rotate the label.
             GraphicsState state = g.Save();
             g.TranslateTransform(Width / 2f, body.Height / 2f);
             g.RotateTransform(-90);

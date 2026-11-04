@@ -27,8 +27,8 @@ public partial class ReservationSearchForm : Form
         btnActivityLog.Click += btnActivityLog_Click;
         btnUndo.Click += btnUndo_Click;
 
-        AcceptButton = btnSearch;                          // Enter key triggers Search
-        _currentSearch = _service.GetAllChronological;     // what "refresh" means at startup
+        AcceptButton = btnSearch;
+        _currentSearch = _service.GetAllChronological;
 
         UpdateInputVisibility();
         ShowResults(_service.GetAllChronological());
@@ -54,7 +54,6 @@ public partial class ReservationSearchForm : Form
         btnHome.BringToFront();
     }
 
-    // Show date pickers only for date searches, the text box for the rest.
     private void UpdateInputVisibility()
     {
         string? filter = cmbFilter.SelectedItem?.ToString();
@@ -72,7 +71,7 @@ public partial class ReservationSearchForm : Form
         dgvReservations.DataSource = results;
         FormatGrid();
 
-        dgvReservations.CurrentCell = null;   // no row selected by default
+        dgvReservations.CurrentCell = null;
         dgvReservations.ClearSelection();
     }
 
@@ -135,7 +134,7 @@ public partial class ReservationSearchForm : Form
         _currentSearch = search;
         ShowResults(_currentSearch());
 
-        txtSearch.Clear();   // ready for the next search
+        txtSearch.Clear();
         txtSearch.Focus();
     }
 
@@ -195,7 +194,7 @@ public partial class ReservationSearchForm : Form
 
         string? entered = PromptDialog.Show(this, "Verify Reservation",
             $"Enter the ID number of the person occupying {selected.SpotOrRoom}:");
-        if (entered == null) return;   // cancelled
+        if (entered == null) return;
 
         OperationResult result = _service.Verify(selected.ReservationId, entered);
 
@@ -231,12 +230,12 @@ public partial class ReservationSearchForm : Form
 
     private void ApplyGridTheme()
     {
-        dgvReservations.EnableHeadersVisualStyles = false;   // needed, or the header colors are ignored
+        dgvReservations.EnableHeadersVisualStyles = false;
         dgvReservations.ColumnHeadersDefaultCellStyle.BackColor = Color.FromArgb(183, 28, 28);
         dgvReservations.ColumnHeadersDefaultCellStyle.ForeColor = Color.White;
         dgvReservations.ColumnHeadersDefaultCellStyle.Font = new Font("Segoe UI", 10, FontStyle.Bold);
         dgvReservations.GridColor = Color.FromArgb(230, 230, 230);
-        dgvReservations.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(253, 236, 236);  // light red tint
+        dgvReservations.AlternatingRowsDefaultCellStyle.BackColor = Color.FromArgb(253, 236, 236);
         dgvReservations.DefaultCellStyle.SelectionBackColor = Color.FromArgb(211, 47, 47);
         dgvReservations.DefaultCellStyle.SelectionForeColor = Color.White;
         dgvReservations.ColumnHeadersDefaultCellStyle.SelectionBackColor = Color.FromArgb(183, 28, 28);

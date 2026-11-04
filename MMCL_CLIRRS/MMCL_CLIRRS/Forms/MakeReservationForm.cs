@@ -1,14 +1,11 @@
 namespace MMCL_CLIRRS;
 
-// Screen for reserving a seat or discussion room (Functionality #1).
-// Built in code (no designer) so every control is visible and easy to follow.
 public class MakeReservationForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
 
     private readonly ReservationManagementService _service;
 
-    // ----- the controls (text boxes, drop-downs, buttons...) -----
     private readonly TextBox _txtName = new TextBox();
     private readonly TextBox _txtIdNumber = new TextBox();
     private readonly ComboBox _cmbUserType = new ComboBox();
@@ -29,7 +26,6 @@ public class MakeReservationForm : Form
     {
         _service = service;
 
-        // ----- the window itself -----
         Text = "Reserve a Seat or Room";
         Font = new Font("Segoe UI", 10);
         BackColor = Color.White;
@@ -39,7 +35,6 @@ public class MakeReservationForm : Form
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(450, 720);
 
-        // ----- red title bar -----
         Controls.Add(new Label
         {
             Text = "Reserve a Seat or Room",
@@ -52,7 +47,6 @@ public class MakeReservationForm : Form
             Padding = new Padding(12, 0, 0, 0)
         });
 
-        // ----- section 1: who is reserving -----
         AddSectionTitle("Your details", 62);
         AddRow("Full name:", _txtName, 92);
         AddRow("ID number:", _txtIdNumber, 130);
@@ -75,7 +69,6 @@ public class MakeReservationForm : Form
         _numYear.Maximum = 6;
         AddRow("Year level:", _numYear, 282);
 
-        // ----- section 2: what they want to reserve -----
         AddSectionTitle("Reservation   (students: today only | faculty: today or later)", 326);
 
         _cmbSpotType.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -87,7 +80,7 @@ public class MakeReservationForm : Form
         AddRow("Spot / Room:", _cmbSpot, 394);
 
         _dtpDate.Format = DateTimePickerFormat.Short;
-        _dtpDate.MinDate = DateTime.Today;      // cannot pick the past
+        _dtpDate.MinDate = DateTime.Today;
         _dtpDate.Value = DateTime.Today;
         AddRow("Date:", _dtpDate, 432);
 
@@ -97,7 +90,6 @@ public class MakeReservationForm : Form
         AddRow("Start time:", _dtpStart, 470);
         AddRow("End time:", _dtpEnd, 508);
 
-        // ----- live availability message + list of already-booked times -----
         _lblAvailability.Location = new Point(20, 552);
         _lblAvailability.Size = new Size(410, 26);
         _lblAvailability.Font = new Font("Segoe UI", 10, FontStyle.Bold);
@@ -114,7 +106,6 @@ public class MakeReservationForm : Form
         _lstBooked.Size = new Size(410, 52);
         Controls.Add(_lstBooked);
 
-        // ----- buttons -----
         Button btnReserve = MakeButton("Reserve", Maroon, Color.White, 200);
         Button btnClose = MakeButton("Close", Color.White, Maroon, 320);
         btnReserve.Click += btnReserve_Click;
@@ -124,7 +115,6 @@ public class MakeReservationForm : Form
         Controls.Add(btnReserve);
         Controls.Add(btnClose);
 
-        // ----- fill the spot list, then start listening for changes -----
         FillPrograms();
         FillSpotList();
         ApplyUserTypeRules();
@@ -139,10 +129,6 @@ public class MakeReservationForm : Form
         RefreshAvailability();
     }
 
-    // =========================================================
-    //  What happens when things change or get clicked
-    // =========================================================
-
     private void FillPrograms()
     {
         _cmbProgram.Items.Clear();
@@ -156,7 +142,6 @@ public class MakeReservationForm : Form
             _cmbProgram.SelectedIndex = 0;
     }
 
-    // Seat / Table -> show seats.  Discussion Room -> show rooms.
     private void FillSpotList()
     {
         _cmbSpot.Items.Clear();
@@ -166,11 +151,9 @@ public class MakeReservationForm : Form
             : ClirLayout.GetDiscussionRooms();
 
         _cmbSpot.Items.AddRange(spots.ToArray());
-        _cmbSpot.SelectedIndex = 0;      // this also triggers RefreshAvailability
+        _cmbSpot.SelectedIndex = 0;
     }
 
-    // Students: date is locked to today, year level is needed.
-    // Faculty: can pick upcoming dates, year level does not apply.
     private void ApplyUserTypeRules()
     {
         bool isStudent = _cmbUserType.SelectedIndex == 0;
@@ -180,7 +163,6 @@ public class MakeReservationForm : Form
         _numYear.Enabled = isStudent;
     }
 
-    // Shows green "Available" or red "Not available" while the user picks the time.
     private void RefreshAvailability()
     {
         if (_cmbSpot.SelectedItem is not string spot) return;
@@ -189,7 +171,6 @@ public class MakeReservationForm : Form
         TimeSpan start = _dtpStart.Value.TimeOfDay;
         TimeSpan end = _dtpEnd.Value.TimeOfDay;
 
-        // List the times that are already taken (earliest first).
         _lstBooked.Items.Clear();
         List<Reservation> booked = _service.GetBookedSlots(spot, date);
         if (booked.Count == 0)
@@ -218,7 +199,6 @@ public class MakeReservationForm : Form
     {
         bool isStudent = _cmbUserType.SelectedIndex == 0;
 
-        // 1. Collect everything the user typed into a request.
         var request = new ReservationRequest
         {
             UserName = _txtName.Text.Trim(),
@@ -234,10 +214,8 @@ public class MakeReservationForm : Form
             EndTime = _dtpEnd.Value.TimeOfDay
         };
 
-        // 2. Hand it to the service. It checks the rules and uses the queue.
         OperationResult result = _service.SubmitRequest(request);
 
-        // 3. Show the answer.
         MessageBox.Show(result.Message,
             result.Success ? "Reservation confirmed" : "Could not reserve",
             MessageBoxButtons.OK,
@@ -250,10 +228,6 @@ public class MakeReservationForm : Form
         }
         RefreshAvailability();
     }
-
-    // =========================================================
-    //  Small helpers that build the screen
-    // =========================================================
 
     private void AddSectionTitle(string text, int y)
     {
@@ -278,8 +252,8 @@ public class MakeReservationForm : Form
     private static void SetupTimePicker(DateTimePicker picker, DateTime value)
     {
         picker.Format = DateTimePickerFormat.Custom;
-        picker.CustomFormat = "HH:mm";      // 24-hour clock, e.g. 14:00
-        picker.ShowUpDown = true;           // little up/down arrows instead of a calendar
+        picker.CustomFormat = "HH:mm";
+        picker.ShowUpDown = true;
         picker.Value = value;
     }
 

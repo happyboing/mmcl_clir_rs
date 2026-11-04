@@ -1,6 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Department -> available programs for the reservation forms.
 public static class AcademicPrograms
 {
     public static readonly string[] Departments =

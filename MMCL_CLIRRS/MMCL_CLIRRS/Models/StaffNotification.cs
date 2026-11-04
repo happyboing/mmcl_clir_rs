@@ -1,6 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// What CLIR personnel are told when a reserved seat reaches the grace period unoccupied.
 public sealed record StaffNotification(
     DateTime RaisedAt,
     int ReservationId,

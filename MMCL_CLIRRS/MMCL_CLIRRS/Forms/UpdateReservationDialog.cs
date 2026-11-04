@@ -23,7 +23,6 @@ public class UpdateReservationDialog : Form
         StartPosition = FormStartPosition.CenterParent;
         ClientSize = new Size(380, 250);
 
-        // Only seats and rooms that exist in the CLIR layout can be chosen.
         _cmbSpot.DropDownStyle = ComboBoxStyle.DropDownList;
         _cmbSpot.Items.AddRange(ClirLayout.GetSeats().ToArray());
         _cmbSpot.Items.AddRange(ClirLayout.GetDiscussionRooms().ToArray());

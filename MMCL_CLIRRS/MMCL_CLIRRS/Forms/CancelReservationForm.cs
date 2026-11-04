@@ -1,6 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Screen where a user cancels their OWN reservation by typing their ID number.
 public class CancelReservationForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -36,7 +35,6 @@ public class CancelReservationForm : Form
             Padding = new Padding(12, 0, 0, 0)
         });
 
-        // Step 1: type your ID number and press Find
         Controls.Add(new Label { Text = "Enter your ID number:", Location = new Point(20, 68), AutoSize = true });
         _txtIdNumber.Location = new Point(20, 94);
         _txtIdNumber.Width = 280;
@@ -52,7 +50,6 @@ public class CancelReservationForm : Form
         _lblInfo.Text = "Your active reservations will appear below.";
         Controls.Add(_lblInfo);
 
-        // Step 2: pick one from the list
         _list.Location = new Point(20, 162);
         _list.Size = new Size(480, 180);
         _list.View = View.Details;
@@ -66,7 +63,6 @@ public class CancelReservationForm : Form
         _list.Columns.Add("Time", 110);
         Controls.Add(_list);
 
-        // Step 3: press Cancel Reservation
         Button btnCancel = MakeButton("Cancel Reservation", Maroon, Color.White, 215, 365, 175);
         Button btnClose = MakeButton("Close", Color.White, Maroon, 400, 365, 100);
         btnCancel.Click += btnCancel_Click;
@@ -74,7 +70,7 @@ public class CancelReservationForm : Form
         Controls.Add(btnCancel);
         Controls.Add(btnClose);
 
-        AcceptButton = btnFind;     // pressing Enter = Find
+        AcceptButton = btnFind;
         CancelButton = btnClose;
     }
 
@@ -88,7 +84,6 @@ public class CancelReservationForm : Form
         LoadReservations();
     }
 
-    // Fill the list with this person's active reservations.
     private void LoadReservations()
     {
         _list.Items.Clear();
@@ -100,7 +95,7 @@ public class CancelReservationForm : Form
             item.SubItems.Add(r.SpotOrRoom);
             item.SubItems.Add(r.Date.ToString("ddd, dd MMM yyyy"));
             item.SubItems.Add($"{Clock(r.StartTime)} - {Clock(r.EndTime)}");
-            item.Tag = r;                    // remember the reservation behind this row
+            item.Tag = r;
             _list.Items.Add(item);
         }
 
@@ -122,7 +117,6 @@ public class CancelReservationForm : Form
             "Please confirm", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
         if (answer != DialogResult.Yes) return;
 
-        // The service checks again that this ID number really owns the reservation.
         OperationResult result = _service.CancelReservation(r.ReservationId, _txtIdNumber.Text);
 
         MessageBox.Show(result.Message,

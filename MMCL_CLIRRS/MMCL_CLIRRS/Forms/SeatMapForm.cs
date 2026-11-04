@@ -2,13 +2,6 @@ using System.Drawing.Drawing2D;
 
 namespace MMCL_CLIRRS;
 
-// ============================================================
-//  Functionality #3: CLIR Interactive Seat Map
-//  The entrance-terminal screen. It draws the CLIR floor plan,
-//  colours every seat/room by its status, shows the details of
-//  the selected place, and lets the user cancel a reserved spot
-//  without leaving the map.
-// ============================================================
 public class SeatMapForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -89,8 +82,6 @@ public class SeatMapForm : Form
         };
         _refreshTimer.Start();
 
-        // Functionality #2: when the grace-period monitor releases or completes a
-        // reservation, redraw the map right away instead of waiting for the next refresh.
         if (_monitor != null)
         {
             _monitor.ScheduleChanged += OnScheduleChanged;
@@ -111,10 +102,6 @@ public class SeatMapForm : Form
             _toolTip.Dispose();
         };
     }
-
-    // =========================================================
-    //  Building the screen
-    // =========================================================
 
     private void BuildHeader()
     {
@@ -160,7 +147,6 @@ public class SeatMapForm : Form
         btnHome.Click += (s, e) => Close();
         header.Controls.Add(btnHome);
 
-        // Shows when a seat was released because nobody came within the grace period.
         _lblAlerts.AutoSize = false;
         _lblAlerts.Location = new Point(ClientSize.Width - 520, 18);
         _lblAlerts.Size = new Size(350, 24);
@@ -472,10 +458,6 @@ public class SeatMapForm : Form
         return button;
     }
 
-    // =========================================================
-    //  Map painting (the room itself, not the clickable spots)
-    // =========================================================
-
     private void MapPanel_Paint(object? sender, PaintEventArgs e)
     {
         Graphics g = e.Graphics;
@@ -488,7 +470,6 @@ public class SeatMapForm : Form
         g.FillPath(floorBrush, floorPath);
         g.DrawPath(wallPen, floorPath);
 
-        // Leave the bottom edge open where the exit and entrance sit.
         using var mapBackgroundBrush = new SolidBrush(_mapPanel.BackColor);
         int openWidth = ClirMapLayout.MapWidth - 84;
         g.FillRectangle(floorBrush, new Rectangle(42, 548, openWidth, 5));
@@ -506,10 +487,8 @@ public class SeatMapForm : Form
             LineAlignment = StringAlignment.Center
         };
 
-        // Straight table with monitors in the upper-left corner.
         DrawMonitorTable(g);
 
-        // Five small tables, each with one seat underneath.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
             var cell = new Rectangle(260 + i * 62, 145, 58, 58);
@@ -521,7 +500,6 @@ public class SeatMapForm : Form
                 new RectangleF(cell.X, cell.Bottom - 16, cell.Width, 14), centerFormat);
         }
 
-        // Round tables with their names.
         int[] radii = { 28, 28, 38, 36, 34 };
         for (int i = 0; i < ClirMapLayout.TableCenters.Count; i++)
         {
@@ -535,7 +513,6 @@ public class SeatMapForm : Form
                 new RectangleF(table.X, table.Y, table.Width, table.Height), centerFormat);
         }
 
-        // The discussion room is the only room in the wing.
         using (GraphicsPath wingPath = RoundedRect(new Rectangle(770, 180, 112, 220), 8))
         {
             using var roomFill = new SolidBrush(Color.FromArgb(245, 245, 245));
@@ -544,7 +521,6 @@ public class SeatMapForm : Form
             g.DrawPath(roomPen, wingPath);
         }
 
-        // Smaller door-style entrance and exit, flush with the bottom edge.
         DrawDoor(g, new Rectangle(24, 528, 76, 24), "Exit");
         DrawDoor(g, new Rectangle(790, 528, 88, 24), "Entrance");
     }
@@ -579,7 +555,6 @@ public class SeatMapForm : Form
         g.FillPath(fill, path);
         g.DrawPath(line, path);
 
-        // A diagonal leaf and a handle make the block read as a door.
         g.DrawLine(detail, bounds.Left + 7, bounds.Top + 4,
                            bounds.Left + 21, bounds.Bottom - 4);
         g.FillEllipse(knob, bounds.Right - 12, bounds.Top + bounds.Height / 2 - 2, 4, 4);
@@ -593,10 +568,6 @@ public class SeatMapForm : Form
         g.DrawString(text, font, Brushes.DimGray,
             new RectangleF(bounds.X + 22, bounds.Y, bounds.Width - 24, bounds.Height), format);
     }
-
-    // =========================================================
-    //  Status refresh and selection
-    // =========================================================
 
     private void RefreshMap()
     {
@@ -779,7 +750,6 @@ public class SeatMapForm : Form
 
         if (dialog.ShowDialog(this) != DialogResult.OK) return;
 
-        // Show the map at the time that was actually reserved.
         _updatingPickers = true;
         _dtpDate.Value = dialog.ReservationDate;
         _dtpTime.Value = DateTime.Today.Add(dialog.ReservationStart);
@@ -798,10 +768,6 @@ public class SeatMapForm : Form
             BeginCancel(_selectedSpot, snapshot.Reservation);
         }
     }
-
-    // =========================================================
-    //  Cancel a reserved spot from the terminal
-    // =========================================================
 
     private void BeginCancel(ClirMapSpot spot, Reservation reservation)
     {
@@ -838,10 +804,6 @@ public class SeatMapForm : Form
             RefreshMap();
         }
     }
-
-    // =========================================================
-    //  Date / time helpers
-    // =========================================================
 
     private void RestoreSessionOrNow()
     {

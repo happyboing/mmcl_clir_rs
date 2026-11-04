@@ -1,8 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Reservation form used by the interactive seat map. The spot is already
-// chosen from the map, so this dialog only asks for the user's details and
-// reservation time before sending the request through the normal service.
 public class ReserveSpotDialog : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -204,7 +201,6 @@ public class ReserveSpotDialog : Form
         }
         else
         {
-            // Suggest the next gap of the same length so the user does not have to guess.
             TimeWindow? next = _availability.FindNextFreeSlot(
                 _spot.SpotOrRoom, date, end - start, start);
 

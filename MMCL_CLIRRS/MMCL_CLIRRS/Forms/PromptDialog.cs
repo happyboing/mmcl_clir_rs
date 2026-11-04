@@ -2,7 +2,6 @@
 
 public static class PromptDialog
 {
-    // Returns the typed text, or null if the user cancelled.
     public static string? Show(IWin32Window owner, string title, string message,
                                bool maskInput = false, string okText = "Verify")
     {

@@ -1,7 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// The list of every seat and room inside the CLIR.
-// This is shared by the reservation form and the interactive seat map.
 public static class ClirLayout
 {
     public const int TableCount = 5;
@@ -16,7 +14,6 @@ public static class ClirLayout
     public const int FloorChairCount = 3;
     public const int FloorAreaCount = 2;
 
-    // Every reservable seat, couch, bean bag and table.
     public static List<string> GetSeats()
     {
         var seats = new List<string>();
@@ -52,7 +49,6 @@ public static class ClirLayout
         return seats;
     }
 
-    // The CLIR sketch has one discussion room.
     public static List<string> GetDiscussionRooms()
     {
         var rooms = new List<string>();

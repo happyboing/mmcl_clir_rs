@@ -1,18 +1,7 @@
 namespace MMCL_CLIRRS;
 
-// ============================================================
-//  Functionality #2: Reservation Scheduling and Availability
-//  Answers "when is this seat or room free?".
-//
-//  Algorithm: a single left-to-right SWEEP over the spot's bookings.
-//  GetBookedSlots() already returns them sorted by start time (Merge Sort),
-//  so one pass is enough: keep a "cursor" at the end of the last booking,
-//  and every gap between the cursor and the next booking is a free window.
-//  Cost after sorting: O(k) for k bookings on that spot and date.
-// ============================================================
 public class AvailabilityService
 {
-    // The reservation dialog allows times up to 23:00.
     public static readonly TimeSpan OpeningTime = TimeSpan.Zero;
     public static readonly TimeSpan ClosingTime = TimeSpan.FromHours(23);
 
@@ -23,7 +12,6 @@ public class AvailabilityService
         _management = management;
     }
 
-    // Every free window for this spot on this date between 'from' and 'to', earliest first.
     public List<TimeWindow> GetFreeWindows(string spotOrRoom, DateTime date, TimeSpan from, TimeSpan to)
     {
         var free = new List<TimeWindow>();
@@ -31,13 +19,13 @@ public class AvailabilityService
 
         foreach (Reservation booking in _management.GetBookedSlots(spotOrRoom, date))
         {
-            if (booking.EndTime <= cursor) continue;   // finished before the part we care about
-            if (booking.StartTime >= to) break;        // starts after it: nothing more to check
+            if (booking.EndTime <= cursor) continue;
+            if (booking.StartTime >= to) break;
 
             if (booking.StartTime > cursor)
                 free.Add(new TimeWindow(cursor, booking.StartTime));
 
-            cursor = booking.EndTime;                  // continue after this booking
+            cursor = booking.EndTime;
         }
 
         if (cursor < to)
@@ -46,8 +34,6 @@ public class AvailabilityService
         return free;
     }
 
-    // The first slot of the wanted length that starts at or after 'notBefore'.
-    // Returns null when the rest of the day has no gap that long.
     public TimeWindow? FindNextFreeSlot(string spotOrRoom, DateTime date,
                                         TimeSpan duration, TimeSpan notBefore)
     {

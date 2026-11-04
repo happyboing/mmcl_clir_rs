@@ -1,7 +1,5 @@
 ﻿namespace MMCL_CLIRRS;
 
-// Keeps the staff screen away from students: a PIN, with a short lockout after wrong tries.
-// This is a deterrent for the kiosk, not real security.
 public class StaffAccessControl
 {
     private const int MaxFailedAttempts = 3;

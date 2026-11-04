@@ -1,7 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// A simple start screen so every functionality can be opened from one place.
-// When your groupmates finish theirs, they just add one more button here.
 public class MainMenuForm : Form
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);
@@ -12,7 +10,6 @@ public class MainMenuForm : Form
     private readonly Button _btnAlerts;
     private readonly System.Windows.Forms.Timer _monitorTimer = new System.Windows.Forms.Timer();
 
-    // CHANGE THIS PIN before the demo.
     private readonly StaffAccessControl _staffAccess = new StaffAccessControl("2468");
 
     public MainMenuForm(ReservationManagementService management, ReservationSearchService search,
@@ -58,7 +55,6 @@ public class MainMenuForm : Form
         Controls.Add(btnStats);
         Controls.Add(_btnAlerts);
 
-        // Functionality #2: every second, release reservations whose grace period is over.
         _monitor.AlertRaised += OnAlertRaised;
         _monitor.AlertsChanged += UpdateAlertsButton;
         _monitorTimer.Interval = 1000;
@@ -76,13 +72,11 @@ public class MainMenuForm : Form
         UpdateAlertsButton();
     }
 
-    // A reserved seat reached the grace period unoccupied: make a sound so the staff notice.
     private void OnAlertRaised(StaffNotification alert)
     {
         System.Media.SystemSounds.Exclamation.Play();
     }
 
-    // Shows how many alerts are waiting; the button turns red when there are any.
     private void UpdateAlertsButton()
     {
         int count = _monitor.PendingAlertCount;
@@ -103,7 +97,6 @@ public class MainMenuForm : Form
         form.ShowDialog(this);
     }
 
-    // Students never see staff screens: they open only after the correct PIN.
     private void OpenStaffScreen()
     {
         if (!TryStaffAccess()) return;
@@ -130,7 +123,7 @@ public class MainMenuForm : Form
 
         string? pin = PromptDialog.Show(this, "Staff Access", "Enter the staff PIN:",
                                         maskInput: true, okText: "Enter");
-        if (pin == null) return false;   // cancelled
+        if (pin == null) return false;
 
         if (!_staffAccess.TryUnlock(pin))
         {

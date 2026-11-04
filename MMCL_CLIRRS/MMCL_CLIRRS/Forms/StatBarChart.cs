@@ -1,6 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// Small horizontal bar chart used by the statistics dashboard.
 public sealed class StatBarChart : Control
 {
     private static readonly Color Maroon = Color.FromArgb(183, 28, 28);

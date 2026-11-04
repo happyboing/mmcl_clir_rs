@@ -1,11 +1,5 @@
 namespace MMCL_CLIRRS;
 
-// ============================================================
-//  Functionality #3: CLIR Interactive Seat Map
-//  The floor-plan positions of every clickable seat and room.
-//  The names come from ClirLayout, so reservations made in
-//  Functionality #1 appear on the correct place here.
-// ============================================================
 public static class ClirMapLayout
 {
     public const int MapWidth = 900;
@@ -20,16 +14,13 @@ public static class ClirMapLayout
 
     public static Rectangle PieBounds { get; } = new Rectangle(170, 272, 76, 98);
 
-    // Centre of each round table on the floor plan. The positions follow
-    // the CLIR sketch: two tables on the left, a large centre table, a
-    // large table on the right, and one near the top-right corner.
     public static IReadOnlyList<Point> TableCenters { get; } = new[]
     {
-        new Point(100, 285),   // Table 1 - upper-left floor area
-        new Point(100, 430),   // Table 2 - lower-left floor area
-        new Point(335, 370),   // Table 3 - large centre table
-        new Point(650, 330),   // Table 4 - large right-side table
-        new Point(680, 130)    // Table 5 - top-right table
+        new Point(100, 285),
+        new Point(100, 430),
+        new Point(335, 370),
+        new Point(650, 330),
+        new Point(680, 130)
     };
 
     public static IReadOnlyList<ClirMapSpot> Spots { get; } = BuildSpots();
@@ -52,7 +43,6 @@ public static class ClirMapLayout
 
         var spots = new List<ClirMapSpot>();
 
-        // Four chairs around each round table.
         for (int tableIndex = 0; tableIndex < TableCenters.Count; tableIndex++)
         {
             Point center = TableCenters[tableIndex];
@@ -84,7 +74,6 @@ public static class ClirMapLayout
             }
         }
 
-        // One seat under each of the five monitors.
         for (int i = 0; i < ClirLayout.MonitorSeatCount; i++)
         {
             var bounds = new Rectangle(
@@ -102,7 +91,6 @@ public static class ClirMapLayout
                 bounds));
         }
 
-        // Each of the eight pie cuts is a seat.
         for (int i = 0; i < ClirLayout.PieSeatCount; i++)
         {
             spots.Add(new ClirMapSpot(
@@ -114,7 +102,6 @@ public static class ClirMapLayout
                 PieBounds));
         }
 
-        // Five larger bean bags along the top wall.
         for (int i = 0; i < 5; i++)
         {
             spots.Add(new ClirMapSpot(
@@ -126,7 +113,6 @@ public static class ClirMapLayout
                 new Rectangle(260 + i * 62, 8, 56, 58)));
         }
 
-        // Another five bean bags above the row of small tables.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
             int cellX = 260 + i * 62;
@@ -139,7 +125,6 @@ public static class ClirMapLayout
                 new Rectangle(cellX + 1, 80, 56, 58)));
         }
 
-        // Five small tables, each with one solo seat below it.
         for (int i = 0; i < ClirLayout.BeanBagTableCount; i++)
         {
             int cellX = 260 + i * 62;
@@ -152,7 +137,6 @@ public static class ClirMapLayout
                 new Rectangle(cellX + 7, 209, SeatControlWidth, SeatControlHeight)));
         }
 
-        // Couches in the middle and along the bottom.
         spots.Add(new ClirMapSpot("Couch 1", ClirSpotKind.Couch, "—", "Lounge Area", 1,
             new Rectangle(464, 350, 46, 140)));
         spots.Add(new ClirMapSpot("Couch 2", ClirSpotKind.Couch, "—", "Lounge Area", 2,
@@ -160,7 +144,6 @@ public static class ClirMapLayout
         spots.Add(new ClirMapSpot("Couch 3", ClirSpotKind.Couch, "—", "Lounge Area", 3,
             new Rectangle(500, 490, 220, 60)));
 
-        // Three loose floor chairs at the bottom.
         for (int i = 0; i < ClirLayout.FloorChairCount; i++)
         {
             spots.Add(new ClirMapSpot(
@@ -172,17 +155,14 @@ public static class ClirMapLayout
                 new Rectangle(230 + i * 65, 498, 55, 44)));
         }
 
-        // The two open floor areas are reservable too.
         spots.Add(new ClirMapSpot("Floor Area 1", ClirSpotKind.FloorArea, "—",
             "Floor Area", 0, new Rectangle(16, 181, 150, 44)));
         spots.Add(new ClirMapSpot("Floor Area 2", ClirSpotKind.FloorArea, "—",
             "Floor Area", 0, new Rectangle(176, 452, 150, 44)));
 
-        // The small rectangular reading table.
         spots.Add(new ClirMapSpot("Small Table", ClirSpotKind.Table, "—",
             "Main Reading Area", 0, new Rectangle(585, 420, 100, 50)));
 
-        // The sketch has one discussion room.
         for (int room = 1; room <= ClirLayout.DiscussionRoomCount; room++)
         {
             spots.Add(new ClirMapSpot(
