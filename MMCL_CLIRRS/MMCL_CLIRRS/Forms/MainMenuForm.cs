@@ -144,18 +144,8 @@ public class MainMenuForm : Form
 
         panel.Controls.Add(new Label
         {
-            Text = "Choose an action to get started.",
-            Location = new Point(34, 88),
-            AutoSize = true,
-            Font = Theme.Font(10f),
-            ForeColor = Theme.Muted,
-            BackColor = Color.Transparent
-        });
-
-        panel.Controls.Add(new Label
-        {
             Text = "STUDENT & STAFF TOOLS",
-            Location = new Point(34, 120),
+            Location = new Point(34, 94),
             AutoSize = true,
             Font = Theme.Font(8f, FontStyle.Bold),
             ForeColor = Theme.Muted,
